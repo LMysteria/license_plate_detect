@@ -5,7 +5,7 @@ import math
 from .function import helper, utils_rotate
 import os
 
-def LP_recognition(img_path, img_ext):
+def LP_recognition(img_path):
     # load yolo model for detect and character detection stage
     # please download yolov5 from our link on github
     yolo_LP_detect = torch.hub.load('yolov5', 'custom', path='./App/licensedetection/model/LP_detector.pt', force_reload=True, source='local')
@@ -16,7 +16,7 @@ def LP_recognition(img_path, img_ext):
     yolo_license_plate.conf = 0.60
 
     #enter image path here
-    img_file = os.path.join(os.getcwd(),img_path+"."+img_ext)
+    img_file = os.path.join(os.getcwd(),img_path)
     img = cv2.imread(img_file)
     plates = yolo_LP_detect(img, size=640)
 
@@ -51,4 +51,4 @@ def LP_recognition(img_path, img_ext):
                     break
                 
     print(list_read_plates)
-    return {"license_number": list_read_plates}
+    return list(list_read_plates)

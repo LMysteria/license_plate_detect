@@ -174,3 +174,6 @@ cache_ch.jpg
 edge.jpg
 line.jpg
 crop.jpg
+
+/uploadfile/*
+/App/images
