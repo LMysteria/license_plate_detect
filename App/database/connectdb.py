@@ -5,7 +5,7 @@ from dotenv import find_dotenv, load_dotenv
 from os import getenv
 
 #database connection config
-load_dotenv(find_dotenv("/App/keys/db.env", usecwd=True))
+load_dotenv(find_dotenv("App/keys/db.env", usecwd=True))
 config={
     "username" : getenv("DBUSERNAME"),
     "password" : getenv("DBPASSWORD"),

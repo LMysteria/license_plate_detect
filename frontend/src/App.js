@@ -10,28 +10,31 @@ function App() {
     const [license, setLicense] = useState(null);
 
   const fetching = (img) => {
-      const form = new FormData()
-      form.append("img",img)
-      console.log(img.type)
-      console.log(form)
-      fetch("http://localhost:8000/detect",{
-        method: "POST",
-        body: form
-      })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        setLicense(data["license_number"])
-      })
-      .catch((err)=>console.log(err))
-    }
+    const form = new FormData()
+    form.append("img",img)
+    console.log(img.type)
+    console.log(form)
+    fetch("http://localhost:8000/detect",{
+      method: "POST",
+      body: form
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data);
+      let result = ""
+      for (let i in data["license_number"]){
+        result += data["license_number"][i] + ", "
+      }
+      setLicense(result)
+    })
+    .catch((err)=>console.log(err))
+  }
     
     // Return the JSX for rendering
     return (
       <div>
         {/* Header */}
-        <h1>Upload and Display Image</h1>
-        <h3>using React Hooks</h3>
+        <h1>Upload Image to detect License Number</h1>
   
         {/* Conditionally render the selected image if it exists */}
         {selectedImage&&(
