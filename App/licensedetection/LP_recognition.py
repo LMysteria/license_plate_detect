@@ -21,6 +21,7 @@ def LP_recognition(img_path):
     plates = yolo_LP_detect(img, size=640)
 
     list_plates = plates.pandas().xyxy[0].values.tolist()
+    print(list_plates)
     list_read_plates = set()
     count = 0
     if len(list_plates) == 0:

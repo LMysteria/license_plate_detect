@@ -1,12 +1,12 @@
 import shutil
 from pathlib import Path
-from tempfile import NamedTemporaryFile, TemporaryDirectory
+from tempfile import NamedTemporaryFile
 import os
 import zipfile
 import glob
 from fastapi import UploadFile
-from database import crud
-
+from database import crud, models
+import yaml
 
 def save_upload_file_tmp(upload_file: UploadFile) -> Path:
     try:
@@ -24,13 +24,49 @@ def save_upload_file(upload_file: UploadFile, destination: Path) -> None:
             shutil.copyfileobj(upload_file.file, buffer)
     finally:
         upload_file.file.close()
+        
+def import_yolo_dataset_image(dbdataset: models.Dataset, type: str, imgdirpath: str):
+    print("importing {} images".format(type))
+    dbimage: list[dict] = list()
+    dbpath = os.path.join(os.getcwd(),"dataset",dbdataset.dataset_name)
+    exttype = (".jpg",".png")
+    for ext in exttype:
+        for image in glob.glob(os.path.join(dbpath,imgdirpath,"*"+ext)):
+            image = image.split("\\")[-1]
+            relpath = "dataset\\{}\\{}\\{}".format(dbdataset.dataset_name, imgdirpath, image)
+            dbimage.append({"path":relpath, "dataset_id":dbdataset.id, "type":type})
+    crud.bulk_create_image(dbimage)    
+    print("Imported {} images".format(type))
+    
+def import_yolo_dataset_label(dbdataset: models.Dataset, type:str,  imgdirpath: str):
+    print("Importing {} labels".format(type))
+    lbldirpath=imgdirpath.replace("images","labels")
+    dblabel: list[dict] = list()
+    dbpath = os.path.join(os.getcwd(),"dataset",dbdataset.dataset_name)
+    for label in glob.glob(os.path.join(dbpath,lbldirpath,"*.txt")):
+        label = label.split("\\")[-1]
+        with open(os.path.join(dbpath, lbldirpath, label), 'r') as readlabel:
+            values = readlabel.read().split()
+            exttype = (".jpg",".png")
+            for ext in exttype:
+                imgrelpath = os.path.join("dataset", dbdataset.dataset_name,imgdirpath,label.replace(".txt",ext))
+                dbimg = crud.get_image_by_path(imgrelpath)
+                if dbimg:
+                    break
+            for i in range((len(values)-1)//4):
+                dblabel.append({"x_center":values[i*4+1], "y_center":values[i*4+2], "width":values[i*4+3], "height":values[i*4+4], "image_id":dbimg.id})
+                
+    crud.bulk_create_yololabel(dblabel)
+    print("Imported {} labels".format(type))
+    
 
-def import_yolov5_dataset(file: UploadFile, datasetname: str):
+def import_yolo_dataset(file: UploadFile, datasetname: str):
+    print("Importing dataset {}".format, datasetname)
     dbdataset = crud.get_dataset_by_datasetname(dataset_name=datasetname)
 
     path = os.path.join(os.getcwd(),"dataset",datasetname)
     Path(path).mkdir(exist_ok=True)
-    print("extracting zipfile")
+    print("Extracting zipfile")
     
     zippath = save_upload_file_tmp(file)
     
@@ -38,53 +74,31 @@ def import_yolov5_dataset(file: UploadFile, datasetname: str):
         print(f"files in zip: {zip_file.namelist()}")
         zip_file.extractall(path)
 
+    print("Zipfile extracted")
+        
     if(not dbdataset):
         dbdataset = crud.create_dataset(dataset_name=datasetname)
     
-    print("importing train images")
-    dbvalimage: list[dict] = list()
-    print(os.path.join(path,"images","val","*.png"))
-    for valimage in glob.glob(os.path.join(path,"images","val","*.png")):
-        valimage = valimage.split("\\")[-1]
-        relpath = os.path.join("dataset", datasetname,"images","val",valimage)
-        dbvalimage.append({"path":relpath, "dataset_id":dbdataset.id, "type":"val"})
-    crud.bulk_create_image(dbvalimage)
-    print("Imported val images")
     
-    dbvallabel: list[dict] = list()
-    Path(os.path.join(path,"labels","val")).mkdir(exist_ok=True)    
-    for vallabel in glob.glob(os.path.join(path,"labels","val","*.txt")):
-        vallabel = vallabel.split("\\")[-1]
-        with open(os.path.join(path,"labels","val", vallabel), 'r') as readlabel:
-            values = readlabel.read().split()
-            relpath = os.path.join("dataset", datasetname,"images","val",vallabel.split('.')[0]+".png")
-            dbimg = crud.get_image_by_path(relpath)
-            for i in range((len(values)-1)//4):
-                dbvallabel.append({"x_center":values[i*4+1], "y_center":values[i*4+2], "width":values[i*4+3], "height":values[i*4+4], "image_id":dbimg.id})
-                
-    crud.bulk_create_yolov5label(dbvalimage)
-    print("Imported val labels")
-
-    dbtrainimage: list[dict] = list()     
-    for trainimage in glob.glob(os.path.join(path,"images","train","*.png")):
-        trainimage = trainimage.split("\\")[-1]
-        relpath = os.path.join("dataset", datasetname,"images","train",trainimage)
-        dbtrainimage.append({"path":relpath, "dataset_id":dbdataset.id, "type":"train"})
-    crud.bulk_create_image(dbtrainimage)
-    print("Imported train images")
-                
-    dbtrainlabel: list[dict] = list()
-    Path(os.path.join(path,"labels","train")).mkdir(exist_ok=True)    
-    for trainlabel in glob.glob(os.path.join(path,"labels","train","*.txt")):
-        trainlabel = trainlabel.split("\\")[-1]
-        with open(os.path.join(path,"labels","train", trainlabel), 'r') as readlabel:
-            values = readlabel.read().split()
-            relpath = os.path.join("dataset", datasetname,"images","train",trainlabel.split('.')[0]+".png")
-            dbimg = crud.get_image_by_path(relpath)
-            for i in range((len(values)-1)//4):
-                dbtrainlabel.append({"x_center":values[i*4+1], "y_center":values[i*4+2], "width":values[i*4+3], "height":values[i*4+4], "image_id":dbimg.id})
-    crud.bulk_create_yolov5label(dbtrainlabel)
-    print("Imported train labels")
-
-            
+    with open(os.path.join(path,"data.yaml")) as stream:
+        yamldata = yaml.safe_load(stream)
+    trainpath = yamldata["train"].replace("../","").replace("/","\\")
+    valpath = yamldata["val"].replace("../","").replace("/","\\")
+    testpath = yamldata["test"].replace("../","").replace("/","\\")
+    print(trainpath)
+    
+    
+    import_yolo_dataset_image(dbdataset=dbdataset, type="train", imgdirpath = trainpath)
+    import_yolo_dataset_label(dbdataset=dbdataset, type="train", imgdirpath = trainpath)
+    
+    if(os.path.exists(os.path.join(path,valpath))):
+        import_yolo_dataset_image(dbdataset=dbdataset, type="val", imgdirpath = valpath)
+        import_yolo_dataset_label(dbdataset=dbdataset, type="val", imgdirpath = valpath)
+        
+    if(os.path.exists(os.path.join(path,testpath))):
+        import_yolo_dataset_image(dbdataset=dbdataset, type="test", imgdirpath = testpath)
+        import_yolo_dataset_label(dbdataset=dbdataset, type="test", imgdirpath = testpath)
+        
+    print("Imported dataset {}".format, datasetname)
+  
     return True

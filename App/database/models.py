@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, CHAR, ForeignKey, VARCHAR, Double
+from sqlalchemy import Column, Integer, CHAR, ForeignKey, VARCHAR, Double, DATETIME
 from sqlalchemy.orm import relationship
 from .connectdb import Base
 
@@ -11,7 +11,9 @@ class Image(Base):
     
     detectlicense = relationship("DetectedLicense", back_populates="image")
     fromdataset = relationship("Dataset", back_populates="data")
-    yolov5label = relationship("Yolov5Label", back_populates="fromimage")
+    yololabel = relationship("YoloLabel", back_populates="fromimage")
+    entryimage = relationship("ParkingData", back_populates="enimage", foreign_keys="ParkingData.entry_img")
+    exitimage = relationship("ParkingData", back_populates="eximage", foreign_keys="ParkingData.exit_img")
 
     
 class DetectedLicense(Base):
@@ -29,13 +31,35 @@ class Dataset(Base):
     
     data = relationship("Image", back_populates="fromdataset")
     
-class Yolov5Label(Base):
-    __tablename__ = "yolov5label"
-    id = id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
+class YoloLabel(Base):
+    __tablename__ = "yololabel"
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
     x_center = Column(Double, nullable=False)
     y_center = Column(Double, nullable=False)
     width = Column(Double, nullable=False)
     height = Column(Double, nullable=False)
     image_id = Column(Integer, ForeignKey("image.id"), nullable=False)
 
-    fromimage = relationship("Image", back_populates="yolov5label")
+    fromimage = relationship("Image", back_populates="yololabel")
+    
+class ParkingData(Base):
+    __tablename__ = "parkingdata"
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
+    license = Column(CHAR(20), nullable=False)
+    entry_img = Column(Integer, ForeignKey("image.id"), nullable=False)
+    entry_time = Column(DATETIME, nullable=False)
+    exit_img = Column(Integer, ForeignKey("image.id"))
+    exit_time = Column(DATETIME)
+    
+    enimage = relationship("Image", back_populates="entryimage", foreign_keys=[entry_img])
+    eximage = relationship("Image", back_populates="exitimage", foreign_keys=[exit_img])
+
+    
+class Payment(Base):
+    __tablename__ = "payment"
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
+    parking_id = Column(Integer, ForeignKey("parkingdata.id"), nullable=False)
+    payment_amount = Column(Double, nullable=False)
+    payment_time = Column(DATETIME, nullable=False)
+    
+    
