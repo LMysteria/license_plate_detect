@@ -62,4 +62,8 @@ class Payment(Base):
     payment_amount = Column(Double, nullable=False)
     payment_time = Column(DATETIME, nullable=False)
     
-    
+class ParkingLot(Base):
+    __tablename__ = "parkinglot"
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
+    maxspace = Column(Integer, nullable = False)
+    remainingspace = Column(Integer, nullable = False)
