@@ -159,3 +159,14 @@ def get_dataset(offset: int = 0, limit: int = 100):
 @app.get("/get/detectedlicenses", tags=["Get"])
 def get_dataset(offset: int = 0, limit: int = 100):
     return crud.get_detectedlicenses(offset=offset, limit=limit)
+
+@app.get("/get/images/{type}", tags=["Get"])
+def get_images_type(type: Annotated[str, Path()], offset: int = 0, limit: int = 100):
+    return crud.get_images_byType(type=type, offset=offset, limit=limit)
+
+@app.get("/get/yolo/dataset/{datasetid}/data/{type}", tags=["Get"])
+def get_images_type(datasetid:Annotated[int, Path()], type: Annotated[str, Path()], offset: int = 0, limit: int = 100):
+    data = crud.get_data_by_yolodataset_filtertype(type=type, offset=offset, limit=limit, dataset_id=datasetid)
+    for i in range(len(data)):
+        data[i] = {"image":data[i][0], "label":data[i][1]}
+    return data

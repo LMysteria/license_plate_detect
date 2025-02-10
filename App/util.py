@@ -83,22 +83,22 @@ def import_yolo_dataset(file: UploadFile, datasetname: str):
     with open(os.path.join(path,"data.yaml")) as stream:
         yamldata = yaml.safe_load(stream)
     trainpath = yamldata["train"].replace("../","").replace("/","\\")
-    valpath = yamldata["val"].replace("../","").replace("/","\\")
-    testpath = yamldata["test"].replace("../","").replace("/","\\")
     print(trainpath)
     
     
     import_yolo_dataset_image(dbdataset=dbdataset, type="train", imgdirpath = trainpath)
     import_yolo_dataset_label(dbdataset=dbdataset, type="train", imgdirpath = trainpath)
     
-    if(os.path.exists(os.path.join(path,valpath))):
+    if "val" in yamldata:
+        valpath = yamldata["val"].replace("../","").replace("/","\\")
         import_yolo_dataset_image(dbdataset=dbdataset, type="val", imgdirpath = valpath)
         import_yolo_dataset_label(dbdataset=dbdataset, type="val", imgdirpath = valpath)
         
-    if(os.path.exists(os.path.join(path,testpath))):
+    if "test" in yamldata:
+        testpath = yamldata["test"].replace("../","").replace("/","\\")
         import_yolo_dataset_image(dbdataset=dbdataset, type="test", imgdirpath = testpath)
         import_yolo_dataset_label(dbdataset=dbdataset, type="test", imgdirpath = testpath)
         
-    print("Imported dataset {}".format, datasetname)
+    print("Imported dataset {}".format(datasetname))
   
     return True

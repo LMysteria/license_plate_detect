@@ -14,7 +14,6 @@ def get_image_byID(image_id: int) -> models.Image:
         return response
     
 def get_image_by_path(path: str, datasetname: Annotated[str, None] = None) -> models.Image:
-    start = time.time()
     with connectdb.session() as db:
         if datasetname:
             dbdataset = get_dataset_by_datasetname(datasetname)
@@ -26,7 +25,6 @@ def get_image_by_path(path: str, datasetname: Annotated[str, None] = None) -> mo
         else:
             response = db.query(models.Image).filter(models.Image.path == path).first()
             
-        print("Get Image by Path SQL Execution time: {}s".format(round(time.time()-start, 4)))
         return response
     
 def get_license_byID(license_id: int) -> models.DetectedLicense:
@@ -87,6 +85,17 @@ def get_data_by_dataset(dataset_id: int, offset: int = 0, limit: int = 100) -> l
         print("Get Data byDataset SQL Execution time: {}s".format(round(time.time()-start, 4)))
         return img_license_set
     
+def get_data_by_yolodataset_filtertype(dataset_id: int,type: str, offset: int = 0, limit: int = 100) -> list:
+    start = time.time()
+
+    with connectdb.session() as db:
+        response = db.query(models.Image, models.YoloLabel).filter(models.Image.dataset_id==dataset_id).filter(
+                                                        models.Image.type == type).filter(
+                                                        models.YoloLabel.image_id == models.Image.id).offset(offset=offset).limit(limit=limit).all()
+        print("Get Data byDataset SQL Execution time: {}s".format(round(time.time()-start, 4)))
+        print(response)
+        return response
+    
 def get_datasets(offset: int = 0, limit: int = 100) -> list[models.Dataset]:
     start = time.time()
 
@@ -103,6 +112,15 @@ def get_images(offset: int = 0, limit: int = 100) -> list[models.Image]:
         response = db.query(models.Image).offset(offset).limit(limit).all()
         
         print("Get Images SQL Execution time: {}s".format(round(time.time()-start, 4)))
+        return response
+    
+def get_images_byType(type: str, offset: int = 0, limit: int = 100) -> list[models.Image]:
+    start = time.time()
+
+    with connectdb.session() as db:
+        response = db.query(models.Image).filter(models.Image.type == type).offset(offset).limit(limit).all()
+        
+        print("Get Images byType SQL Execution time: {}s".format(round(time.time()-start, 4)))
         return response
     
 def get_detectedlicenses(offset: int = 0, limit: int = 100) -> list[models.DetectedLicense]:
@@ -133,6 +151,7 @@ def get_last_parkingdata_by_licensenumber(licensenumber: str):
         print("Get last parkingdata by licensenumber SQL Execution time: {}s".format(round(time.time()-start, 4)))
         return response
     
+
 #CREATE
 def create_image(image_path: str, type: str, dataset_id: Annotated[int, None] = None) -> models.Image:
     start = time.time()
