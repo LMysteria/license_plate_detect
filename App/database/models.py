@@ -58,6 +58,7 @@ class ParkingData(Base):
 class Payment(Base):
     __tablename__ = "payment"
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
+    address = Column(VARCHAR(255))
     parking_id = Column(Integer, ForeignKey("parkingdata.id"), nullable=False)
     payment_amount = Column(Double, nullable=False)
     payment_time = Column(DATETIME, nullable=False)
@@ -67,3 +68,38 @@ class ParkingLot(Base):
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
     maxspace = Column(Integer, nullable = False)
     remainingspace = Column(Integer, nullable = False)
+    
+class Role(Base):
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
+    name = Column(CHAR(10), nullable=False, unique=True)
+    description = Column(VARCHAR(255))
+    
+    userRole = relationship("UserDetails", back_populates="userrole")
+    
+class User(Base):
+    __tablename__ = "user"
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
+    username = Column(CHAR(20), unique=True, nullable=False)
+    password = Column(VARCHAR(255), nullable=False)
+    
+    details = relationship("UserDetails", back_populates="userid")
+    
+class UserDetail(Base):
+    __tablename__ = "userdetails"
+    id = Column(Integer, ForeignKey("user.id"), primary_key=True, unique=True, nullable=False)
+    fullname = Column(VARCHAR(255), nullable=False)
+    gender = Column(CHAR(10))
+    phonenumber = Column(CHAR(15))
+    balance = Column(Double)
+    roleid = Column(Integer, ForeignKey("role.id"), nullable=False)
+    
+    userid = relationship("User", back_populates="details")
+    userrole = relationship("Role", back_populates="userRole")
+    
+class TransactionDetail(Base):
+    __tablename__ = "transactiondetails"
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
+    userid = Column(Integer, ForeignKey("user.id"), unique=True, nullable=False)
+    balancechanges = Column(Double)
+    description = Column(VARCHAR(255))
+    

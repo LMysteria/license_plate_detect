@@ -1,7 +1,6 @@
 from . import connectdb, models
 from typing import Annotated
 from datetime import datetime
-from sqlalchemy import desc
 import time
 
 def get_image_byID(image_id: int) -> models.Image:

@@ -7,6 +7,7 @@ import glob
 from fastapi import UploadFile
 from database import crud, models
 import yaml
+import time
 
 def save_upload_file_tmp(upload_file: UploadFile) -> Path:
     try:
@@ -102,3 +103,6 @@ def import_yolo_dataset(file: UploadFile, datasetname: str):
     print("Imported dataset {}".format(datasetname))
   
     return True
+
+def time_message(message:str, time:time):
+    print(message+": {}s".format(round(time, 4)))
