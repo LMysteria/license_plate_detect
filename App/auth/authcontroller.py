@@ -1,9 +1,12 @@
 from . import authcrud, authconfig
 from dotenv import load_dotenv, find_dotenv
-from os import getenv
+from os import getenv, getcwd, path
 import subprocess
 from fastapi import HTTPException, status
 import re
+from datetime import datetime, timedelta, timezone
+import jwt
+from ..schema import data
 
 def get_SECRET_KEY() -> str:
     """
@@ -12,11 +15,12 @@ def get_SECRET_KEY() -> str:
     Returns:
         str: SECRET_KEY use for encode and decode jwt
     """
-    load_dotenv(find_dotenv("App/keys/auth.env",usecwd=True))
+    keypath = path.join(getcwd(), "App", "keys", "auth.env")
+    load_dotenv(find_dotenv(keypath,usecwd=True))
     SECRET_KEY = getenv("SECRET_KEY")
     if not SECRET_KEY:
         SECRET_KEY = subprocess.run(["openssl","rand","-hex","32"], stdout=subprocess.PIPE, shell=True).stdout.decode("utf-8").strip()
-        with open("keys/auth.env","a") as config:
+        with open(keypath,"a") as config:
             config.writelines(f"SECRET_KEY=\"{SECRET_KEY}\"")
     return SECRET_KEY
 
@@ -35,7 +39,7 @@ def get_password_hash(password) -> str:
     return authconfig.pwd_context.hash(password)
     
 
-async def signup_user(username:str, password:str) -> str:
+def signup_user(username:str, password:str):
     """
     Create new user
 
@@ -58,6 +62,7 @@ async def signup_user(username:str, password:str) -> str:
     if(check_username[0] != username):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Username must contain only non-special character")
+    print(14)
     db_user = authcrud.get_user_by_username(username)
     if(password==None or password==""):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -69,5 +74,73 @@ async def signup_user(username:str, password:str) -> str:
     if db_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                             detail="Username already registered")
-    return authcrud.create_user(username=username, hashed_password=get_password_hash(password))
+    newuser = authcrud.create_user(username=username, password=get_password_hash(password))
+    return data.User(id=newuser.id, username=username)
 
+#get expires datetime
+def get_expires_datetime() -> datetime:
+    """  
+    Calculate the expiration datetime for the access token.  
+
+    Returns:  
+    datetime: The expiration datetime in UTC.  
+    """ 
+    return (datetime.now(timezone.utc)+timedelta(minutes=authconfig.ACCESS_TOKEN_EXPIRE_MINUTES))
+
+#verify password
+def verify_password(plain_password, hashed_password) -> bool:
+    """  
+    Verify that a plain password matches the hashed password.  
+
+    Parameters:  
+    plain_password (str): The plain text password to verify.  
+    hashed_password (str): The hashed password to verify against.  
+
+    Returns:  
+    bool: True if the password matches the hash, otherwise False.  
+    """  
+    return authconfig.pwd_context.verify(plain_password, hashed_password)
+
+#create jwt access token
+def create_access_token(data: dict) -> str:
+    """  
+    Create a JWT access token with an expiration time.  
+
+    Parameters:  
+    data (Dict[str, any]): The data to encode in the JWT token.  
+
+    Returns:  
+    str: The encoded JWT token as a string.  
+    """ 
+    to_encode = data.copy()
+    expire = get_expires_datetime()
+    to_encode.update({"exp":expire})
+    encoded_jwt = jwt.encode(to_encode, get_SECRET_KEY(), algorithm=authconfig.ALGORITHM)
+    return encoded_jwt
+
+#authenticate user
+def authenticate_user(username: str, password: str) -> str:
+    """
+    Authenticate user via login to gain access
+
+    Parameter:
+        - username (str): The username of the user attempting to log in.
+        - password (str): The raw password of the user attempting to log in.
+        
+    Raises:
+        HTTPException: status_code 401 if username or password is not correct
+
+    Returns:
+        str: access_token
+    """
+    db_user = authcrud.get_user_by_username(username)
+    print("bruh")
+    if not db_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="username or password is incorrect")
+    if not verify_password(password, db_user.password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="username or password is incorrect")
+    data= {"sub":db_user.username}
+    access_token = create_access_token(data=data)
+    return access_token

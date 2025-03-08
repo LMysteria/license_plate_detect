@@ -1,14 +1,16 @@
-from fastapi import FastAPI, UploadFile, File, Path
+from fastapi import FastAPI, UploadFile, File, Path, Form
 from fastapi.responses import JSONResponse
-from licensedetection.LP_recognition import LP_recognition
-import util
+from .licensedetection.LP_recognition import LP_recognition
+from . import util
 import time
 import os
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
-from database import models, connectdb, crud
+from .database import models, connectdb, crud
 from typing import Annotated
 from datetime import datetime
+from .auth import authcontroller, authcrud
+from .schema import data
 
 # Initiate database
 models.Base.metadata.create_all(bind=connectdb.engine)
@@ -31,6 +33,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.post("/signup", tags=["Auth"], response_model=data.User)
+def signup(username: Annotated[str, Form()], password: Annotated[str, Form()]):
+    return authcontroller.signup_user(username=username, password=password)
+
+@app.post("/token", tags=["Auth"])
+def login(username: Annotated[str, Form()], password: Annotated[str, Form()]):
+    return authcontroller.authenticate_user(username=username, password=password)
 
 @app.post("/detect", tags=["License Detection AI"])
 def detect_license(img: UploadFile = File(...)):
@@ -170,3 +179,7 @@ def get_images_type(datasetid:Annotated[int, Path()], type: Annotated[str, Path(
     for i in range(len(data)):
         data[i] = {"image":data[i][0], "label":data[i][1]}
     return data
+
+@app.get("/get/{userid}", tags=["Get"])
+def get_userdetails(userid: Annotated[int, Path()]):
+    return authcrud.get_userdetails_by_userid(userid=userid)

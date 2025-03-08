@@ -5,7 +5,7 @@ import os
 import zipfile
 import glob
 from fastapi import UploadFile
-from database import crud, models
+from .database import crud, models
 import yaml
 import time
 

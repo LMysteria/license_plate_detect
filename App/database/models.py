@@ -70,11 +70,12 @@ class ParkingLot(Base):
     remainingspace = Column(Integer, nullable = False)
     
 class Role(Base):
+    __tablename__ = "role"
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
     name = Column(CHAR(10), nullable=False, unique=True)
     description = Column(VARCHAR(255))
     
-    userRole = relationship("UserDetails", back_populates="userrole")
+    userRole = relationship("UserDetail", back_populates="userrole")
     
 class User(Base):
     __tablename__ = "user"
@@ -82,13 +83,11 @@ class User(Base):
     username = Column(CHAR(20), unique=True, nullable=False)
     password = Column(VARCHAR(255), nullable=False)
     
-    details = relationship("UserDetails", back_populates="userid")
+    details = relationship("UserDetail", back_populates="userid")
     
 class UserDetail(Base):
     __tablename__ = "userdetails"
     id = Column(Integer, ForeignKey("user.id"), primary_key=True, unique=True, nullable=False)
-    fullname = Column(VARCHAR(255), nullable=False)
-    gender = Column(CHAR(10))
     phonenumber = Column(CHAR(15))
     balance = Column(Double)
     roleid = Column(Integer, ForeignKey("role.id"), nullable=False)
