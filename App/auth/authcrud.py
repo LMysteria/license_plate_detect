@@ -13,14 +13,24 @@ def get_user_by_username(username:str) -> models.User:
     time_message("Get user with username "+username+" execution time", time.time()-start)
     return response
 
-def get_role_by_name(name:str) -> models.User:
+def get_role_by_name(name:str) -> models.Role:
     start = time.time()
     
     with connectdb.session() as db:
         response = db.query(models.Role).filter(models.Role.name == name).first()
         if (not response and name == "user"):
             response = create_role(name="user", description="standard user access")
+        if (not response and name == "admin"):
+            response = create_role(name="admin", description="standard admin access")
     time_message("Get role {} execution time".format(name), time.time()-start)
+    return response
+
+def get_role_by_id(id:int) -> models.Role:
+    start = time.time()
+    
+    with connectdb.session() as db:
+        response = db.query(models.Role).filter(models.Role.id == id).first()
+        time_message("Get role with id {} execution time".format(id), time.time()-start)
     return response
         
 def get_userdetails_by_userid(userid:int) -> models.UserDetail:
@@ -31,7 +41,32 @@ def get_userdetails_by_userid(userid:int) -> models.UserDetail:
     time_message("Get userdetails with id {} execution time".format(userid), time.time()-start)
     return response
 
-#
+def get_access_by_name(name:str) -> models.Access:
+    start = time.time()
+    
+    with connectdb.session() as db:
+        response = db.query(models.Access).filter(models.Access.name == name).first()
+        if (not response and name == "standard"):
+            response = create_access(name="standard", description="standard user access")
+        if (not response and name == "adminpage"):
+            response = create_access(name="adminpage", description="adminpage access")
+    time_message("Get access {} execution time".format(name), time.time()-start)
+    return response
+
+#UPDATE
+def update_role(user: models.User, role:models.Role) -> bool:
+    start = time.time()
+    try:
+        with connectdb.session() as db:
+            userdetail = get_userdetails_by_userid(userid=user.id)
+            userdetail.roleid = role.id
+            db.add(userdetail)
+            db.commit()
+            db.refresh()
+            time_message("Update user {} with role {} execution time".format(user.username, role.name), time.time()-start)
+            return True
+    except Exception as e:
+        return e
 
 #CREATE
 def create_user(username:str, password:str) -> models.User:
@@ -75,9 +110,44 @@ def create_role(name: str, description: str) -> models.Role:
             db.add(dbrole)
             db.commit()
             db.refresh(dbrole)
-            
+            if dbrole.name == "user":
+                standard_access = get_access_by_name(name="standard")
+                add_role_access(role=dbrole, access=standard_access)
+            if dbrole.name == "admin":
+                standard_access = get_access_by_name(name="standard")
+                add_role_access(role=dbrole, access=standard_access)
+                adminpage_access = get_access_by_name(name="adminpage")
+                add_role_access(role=dbrole, access=adminpage_access)
             time_message("Create role {} execution time".format(name), time.time()-start)
             return dbrole
     except:
         print("create_role {} error".format(name))
         return None
+    
+def create_access(name: str, description: str) -> models.Access:
+    start = time.time()
+    try:
+
+        with connectdb.session() as db:
+            dbaccess = models.Access(name=name, description=description)
+            db.add(dbaccess)
+            db.commit()
+            db.refresh(dbaccess)
+            
+            time_message("Create access {} execution time".format(name), time.time()-start)
+            return dbaccess
+    except:
+        print("create_access {} error".format(name))
+        return None
+
+def add_role_access(role: models.Role, access: models.Access):
+    start = time.time()
+    try:
+        with connectdb.session() as db:
+            role.roleAccess.append(access)
+            db.commit()
+            db.refresh(role)
+            return True
+    except Exception as e:
+        print("add {} access for role {} error".format(access.name, role.name), time.time()-start)
+        raise e

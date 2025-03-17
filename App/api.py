@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Path, Form
+from fastapi import FastAPI, UploadFile, File, Path, Form, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from .licensedetection.LP_recognition import LP_recognition
 from . import util
@@ -11,11 +11,14 @@ from typing import Annotated
 from datetime import datetime
 from .auth import authcontroller, authcrud
 from .schema import data
+from .admin.admin import adminapi
 
 # Initiate database
 models.Base.metadata.create_all(bind=connectdb.engine)
 
-app = FastAPI()
+app = FastAPI(debug=True)
+
+app.mount("/admin", adminapi)
 
 origins = [
     "http://localhost.tiangolo.com",
@@ -37,9 +40,9 @@ app.add_middleware(
 def signup(username: Annotated[str, Form()], password: Annotated[str, Form()]):
     return authcontroller.signup_user(username=username, password=password)
 
-@app.post("/token", tags=["Auth"])
-def login(username: Annotated[str, Form()], password: Annotated[str, Form()]):
-    return authcontroller.authenticate_user(username=username, password=password)
+@app.post("/login", tags=["Auth"])
+async def login(username: Annotated[str, Form()], password: Annotated[str, Form()]) -> data.Token:
+    return await authcontroller.authenticate_user(username=username, password=password)
 
 @app.post("/detect", tags=["License Detection AI"])
 def detect_license(img: UploadFile = File(...)):
@@ -180,6 +183,10 @@ def get_images_type(datasetid:Annotated[int, Path()], type: Annotated[str, Path(
         data[i] = {"image":data[i][0], "label":data[i][1]}
     return data
 
-@app.get("/get/{userid}", tags=["Get"])
+@app.get("/get/details/{userid}", tags=["Get"])
 def get_userdetails(userid: Annotated[int, Path()]):
     return authcrud.get_userdetails_by_userid(userid=userid)
+
+@app.get("/get/user", tags=["Get"])
+async def get_current_user(user: Annotated[data.User, Depends(authcontroller.get_current_user)]):
+    return user

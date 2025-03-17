@@ -2,11 +2,13 @@ from . import authcrud, authconfig
 from dotenv import load_dotenv, find_dotenv
 from os import getenv, getcwd, path
 import subprocess
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Depends
 import re
 from datetime import datetime, timedelta, timezone
 import jwt
 from ..schema import data
+from typing import Annotated
+from jwt.exceptions import InvalidTokenError
 
 def get_SECRET_KEY() -> str:
     """
@@ -119,7 +121,7 @@ def create_access_token(data: dict) -> str:
     return encoded_jwt
 
 #authenticate user
-def authenticate_user(username: str, password: str) -> str:
+async def authenticate_user(username: str, password: str) -> data.Token:
     """
     Authenticate user via login to gain access
 
@@ -133,14 +135,52 @@ def authenticate_user(username: str, password: str) -> str:
     Returns:
         str: access_token
     """
-    db_user = authcrud.get_user_by_username(username)
-    print("bruh")
-    if not db_user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="username or password is incorrect")
-    if not verify_password(password, db_user.password):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="username or password is incorrect")
-    data= {"sub":db_user.username}
-    access_token = create_access_token(data=data)
-    return access_token
+    unauthorized_msg = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="username or password is incorrect",
+                            headers={"WWW-Authenticate": "Bearer"})
+    try:
+        db_user = authcrud.get_user_by_username(username)
+        print(db_user)
+        if not db_user:
+            raise unauthorized_msg
+        if not verify_password(password, db_user.password):
+            raise unauthorized_msg
+        userdata = {"sub":db_user.username}
+        access_token = create_access_token(data=userdata)
+        return data.Token(access_token=access_token, token_type="bearer")
+    except Exception as error:
+        raise error
+
+async def get_current_user(token: Annotated[str, Depends(authconfig.oauth2_scheme)]) -> data.User:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, get_SECRET_KEY(), algorithms=[authconfig.ALGORITHM])
+        username = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        dbuser = authcrud.get_user_by_username(username=username)
+        if dbuser is None:
+            raise credentials_exception
+        return data.User(id=dbuser.id, username=dbuser.username)
+    except InvalidTokenError:
+        raise credentials_exception
+
+async def check_adminpage_access(user: Annotated[data.User, Depends(get_current_user)]) -> data.User:
+    access_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Access Denied",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        dbadminpage = authcrud.get_access_by_name("adminpage")
+        dbuserdetail = authcrud.get_userdetails_by_userid(userid=user.id)
+        dbrole = authcrud.get_role_by_id(id=dbuserdetail.roleid)
+        if dbadminpage not in dbrole.roleAccess:
+            raise Exception()
+        return user
+    except Exception as e:
+        raise access_exception
