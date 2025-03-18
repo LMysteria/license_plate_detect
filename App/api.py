@@ -64,44 +64,6 @@ def detect_license(img: UploadFile = File(...)):
     print(str(response))
     return JSONResponse(content=response)
 
-@app.post("/parking/entry", tags=["Parking"])
-def parking_entry(img: UploadFile):
-    response = dict()
-    start = time.time()
-    
-    relpath = os.path.join("uploadfile", img.filename)
-    fullpath = os.path.join(os.getcwd(),relpath)
-    util.save_upload_file(img, Path(fullpath))
-    detected = LP_recognition(img_path=relpath)
-    dbimage = crud.create_image(relpath, type="detect")
-    licensedb = crud.create_detectedlicense(license_number=detected[0], image_id=dbimage.id)
-    parkingdb = crud.parking_entry(license_number=licensedb.license_number, entry_image_id=dbimage.id, entry_datetime=datetime.now())
-    
-    execution_time = time.time() - start
-    time_string = "{}s".format(round(execution_time, 4))
-    response["parkingdata"] = parkingdb
-    response["execution_time"] = time_string
-    return response
-
-@app.post("/parking/exit", tags=["Parking"])
-def parking_exit(img: UploadFile):
-    response = dict()
-    start = time.time()
-    
-    relpath = os.path.join("uploadfile", img.filename)
-    fullpath = os.path.join(os.getcwd(),relpath)
-    util.save_upload_file(img, Path(fullpath))
-    detected = LP_recognition(img_path=relpath)
-    dbimage = crud.create_image(relpath, type="detect")
-    licensedb = crud.create_detectedlicense(license_number=detected[0], image_id=dbimage.id)
-    parkingdb = crud.parking_exit(license_number=licensedb.license_number, exit_image=dbimage, exit_datetime=datetime.now())
-    
-    execution_time = time.time() - start
-    time_string = "{}s".format(round(execution_time, 4))
-    response["parkingdata"] = parkingdb
-    response["execution_time"] = time_string
-    return response
-
 #CREATE
 @app.post("/create/dataset", tags=["Create"])
 def create_dataset(dataset_name: str):
@@ -184,3 +146,32 @@ def get_images_type(datasetid:Annotated[int, Path()], type: Annotated[str, Path(
     for i in range(len(data)):
         data[i] = {"image":data[i][0], "label":data[i][1]}
     return data
+
+
+#Remove on production
+@app.get("/role/details", tags=["User"])
+def get_role_detail(roleid: int):
+    return authcrud.get_role_access_by_roleid(id=roleid)
+
+from .admin import adminutil
+
+@app.put("/role/setrole", tags=["User"])
+def set_role(username:Annotated[str, Form()], rolename: Annotated[str, Form()]):
+    """
+    Set user's role level
+
+    Parameters:\n
+        username (str): Username to set role
+        role_level (int): Desired user level for this user
+
+    Returns:\n
+        JSONResponse: A JSON response containing a success message if set role is successful,
+        or an error message if set role fails.
+    """
+    try:
+        result = adminutil.update_user_role(username=username, rolename=rolename)
+
+        return JSONResponse(content=result, status_code=200)
+    
+    except Exception as e:
+        raise e

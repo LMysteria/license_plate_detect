@@ -141,11 +141,12 @@ def get_data_by_dataset_sql(dataset_id: int, offset: int = 0, limit: int = 100):
         print("Get Data ByDataset raw SQL Execution time: {}s".format(round(time.time()-start, 4)))
         return response
     
-def get_last_parkingdata_by_licensenumber(licensenumber: str):
+def get_last_parkingdata_by_licensenumber(licensenumber: str, parkinglotid:int):
     start = time.time()
 
     with connectdb.session() as db:
-        response = db.query(models.ParkingData).filter(models.ParkingData.license == licensenumber).order_by(models.ParkingData.id.desc()).first()
+        response = db.query(models.ParkingData).filter(models.ParkingData.license == licensenumber and 
+                                                       models.ParkingData.parkinglotid==parkinglotid).order_by(models.ParkingData.id.desc()).first()
         
         print("Get last parkingdata by licensenumber SQL Execution time: {}s".format(round(time.time()-start, 4)))
         return response
@@ -190,11 +191,11 @@ def create_dataset(dataset_name: str) -> models.Dataset:
         print("Create Dataset SQL Execution time: {}s".format(round(time.time()-start, 4)))
         return db_dataset
     
-def parking_entry(license_number:str, entry_image_id: int, entry_datetime: datetime):
+def parking_entry(license_number:str, entry_image_id: int, entry_datetime: datetime, parkinglotid:int):
     start = time.time()
 
     with connectdb.session() as db:
-        dbparkingdata = models.ParkingData(license=license_number, entry_img=entry_image_id, entry_time=entry_datetime)
+        dbparkingdata = models.ParkingData(license=license_number, entry_img=entry_image_id, entry_time=entry_datetime, parkinglotid=parkinglotid)
         db.add(dbparkingdata)
         db.commit()
         db.refresh(dbparkingdata)
@@ -253,11 +254,11 @@ def bulk_create_yololabel(list_yolov5label: list[dict]):
         return False        
     
 #UPDATE
-def parking_exit(license_number:str, exit_image: models.Image, exit_datetime: datetime):
+def parking_exit(license_number:str, exit_image: models.Image, exit_datetime: datetime, parkinglotid:int):
     start = time.time()
 
     with connectdb.session() as db:
-        dbparkingdata = get_last_parkingdata_by_licensenumber(licensenumber=license_number)
+        dbparkingdata = get_last_parkingdata_by_licensenumber(licensenumber=license_number, parkinglotid=parkinglotid)
         dbparkingdata.eximage=exit_image
         dbparkingdata.exit_time = exit_datetime
         db.add(dbparkingdata)

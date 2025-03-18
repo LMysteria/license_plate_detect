@@ -26,3 +26,8 @@ def insert_money_to_balance(user: Annotated[data.User, userrouter.dependencies[0
 def payment(user: Annotated[data.User, userrouter.dependencies[0]], payment: Annotated[float, Form()]):
     response = userutil.increasechange(username=user.username, change=payment)
     return response
+
+@userrouter.post("/feedback/create")
+def create_feedback(user: Annotated[data.User, userrouter.dependencies[0]], subject:Annotated[str, Form()], detail: Annotated[str, Form()]):
+    response = userutil.newuserfeedback(username=user.username, subject=subject, detail=detail)
+    return response

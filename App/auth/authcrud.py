@@ -14,6 +14,14 @@ def get_user_by_username(username:str) -> models.User:
     time_message("Get user with username "+username+" execution time", time.time()-start)
     return response
 
+def get_user_by_userid(id:int) -> models.User:
+    start = time.time()
+    
+    with connectdb.session() as db:
+        response = db.query(models.User).filter(models.User.id==id).first()
+    time_message("Get user with id "+id+" execution time", time.time()-start)
+    return response
+
 def get_role_by_name(name:str) -> models.Role:
     start = time.time()
     
@@ -33,6 +41,16 @@ def get_role_by_id(id:int) -> models.Role:
         response = db.query(models.Role).filter(models.Role.id == id).first()
         time_message("Get role with id {} execution time".format(id), time.time()-start)
     return response
+
+def get_role_access_by_roleid(id:int):
+    start = time.time()
+    
+    with connectdb.session() as db:
+        dbrole = db.query(models.Role).filter(models.Role.id == id).first()
+        time_message("Get role with id {} execution time".format(id), time.time()-start)
+        response = dbrole.roleAccess
+    return response
+    
 
 def get_access_by_name(name:str) -> models.Access:
     start = time.time()
@@ -74,9 +92,8 @@ def create_user(username:str, password:str) -> models.User:
             create_user_details(userid=user.id)
             time_message("Create user {} execution time".format(username), time.time()-start)
             return user
-    except:
-        print("create_user {} error".format(username))
-        return None
+    except Exception as e:
+        raise e
 
 def create_user_details(userid:int) -> models.UserDetail:
     start = time.time()
@@ -90,9 +107,8 @@ def create_user_details(userid:int) -> models.UserDetail:
             
             time_message("Create userdetail with id {} execution time".format(userid), time.time()-start)
             return db_userdetails
-    except:
-        print("create userdetail with id {} error".format(userid))
-        return None
+    except Exception as e:
+        raise e
         
 def create_role(name: str, description: str) -> models.Role:
     start = time.time()
@@ -100,9 +116,6 @@ def create_role(name: str, description: str) -> models.Role:
 
         with connectdb.session() as db:
             dbrole = models.Role(name=name, description=description)
-            db.add(dbrole)
-            db.commit()
-            db.refresh(dbrole)
             if dbrole.name == "user":
                 standard_access = get_access_by_name(name="standard")
                 add_role_access(role=dbrole, access=standard_access)
@@ -111,11 +124,13 @@ def create_role(name: str, description: str) -> models.Role:
                 add_role_access(role=dbrole, access=standard_access)
                 adminpage_access = get_access_by_name(name="adminpage")
                 add_role_access(role=dbrole, access=adminpage_access)
+            db.add(dbrole)
+            db.commit()
+            db.refresh(dbrole)
             time_message("Create role {} execution time".format(name), time.time()-start)
             return dbrole
-    except:
-        print("create_role {} error".format(name))
-        return None
+    except Exception as e:
+        raise e
     
 def create_access(name: str, description: str) -> models.Access:
     start = time.time()
@@ -129,18 +144,15 @@ def create_access(name: str, description: str) -> models.Access:
             
             time_message("Create access {} execution time".format(name), time.time()-start)
             return dbaccess
-    except:
-        print("create_access {} error".format(name))
-        return None
+    except Exception as e:
+        raise Exception
 
 def add_role_access(role: models.Role, access: models.Access):
     start = time.time()
     try:
-        with connectdb.session() as db:
-            role.roleAccess.append(access)
-            db.commit()
-            db.refresh(role)
-            return True
+        role.roleAccess.append(access)
+            
+        time_message("Add access {} to role {} execution time".format(access.name, role.name), time.time()-start)
+        return True
     except Exception as e:
-        print("add {} access for role {} error".format(access.name, role.name), time.time()-start)
         raise e

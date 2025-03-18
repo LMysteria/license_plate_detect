@@ -3,6 +3,7 @@ from . import usercrud
 from ...auth import authcrud
 from ...database import models
 
+
 def increasechange(username:str, change:float) -> models.UserDetail:
     if change<0.0:
         raise HTTPException(status_code=400, detail="Insert Money Value must be positive")
@@ -16,3 +17,7 @@ def decreasechange(username:str, change:float) -> models.UserDetail:
     userdb = authcrud.get_user_by_username(username=username)
     updateduserdetail = usercrud.update_userbalance_by_userid(user=userdb, balancechange=-change)
     return updateduserdetail
+
+def newuserfeedback(username:str, subject:str, detail:str) -> models.FeedBack:
+    dbuser = authcrud.get_user_by_username(username=username)
+    return usercrud.create_feedback(user=dbuser, subject=subject, detail=detail)

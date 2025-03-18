@@ -178,9 +178,10 @@ async def check_adminpage_access(user: Annotated[data.User, Depends(get_current_
     try:
         dbadminpage = authcrud.get_access_by_name("adminpage")
         dbuserdetail = authcrud.get_userdetails_by_userid(userid=user.id)
-        dbrole = authcrud.get_role_by_id(id=dbuserdetail.roleid)
-        if dbadminpage not in dbrole.roleAccess:
-            raise Exception()
-        return user
+        dbroleAccess = authcrud.get_role_access_by_roleid(id=dbuserdetail.roleid)
+        for access in dbroleAccess:
+            if access.id == dbadminpage.id:
+                return user
+        raise e
     except Exception as e:
-        raise access_exception
+        raise e

@@ -5,13 +5,19 @@ from fastapi.responses import JSONResponse
 from typing import Annotated
 from . import adminutil
 from ..schema import data
-from ..auth import authcontroller
+from ..auth import authcontroller, authcrud
+from ..router.parkinglot.parkinglot import parkinglotrouter
 
-adminapi = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, servers=[{"url": "/admin"}])
+adminapi = FastAPI(servers=[{"url": "/admin"},{"url":""}], dependencies=[Depends(authcontroller.check_adminpage_access)])
+adminapi.include_router(parkinglotrouter)
 #TODO: Admin page, function
 
-@adminapi.put("/role/setrole", tags=["Users"])
-def set_role(username:Annotated[str, Form()], rolename: Annotated[str, Form()], admin: Annotated[data.User, Depends(authcontroller.check_adminpage_access)]):
+@adminapi.get("/role/details", tags=["User"])
+def get_role_detail(roleid: int):
+    return authcrud.get_role_by_id(id=roleid)
+
+@adminapi.put("/role/setrole", tags=["User"])
+def set_role(username:Annotated[str, Form()], rolename: Annotated[str, Form()]):
     """
     Set user's role level
 
@@ -31,30 +37,13 @@ def set_role(username:Annotated[str, Form()], rolename: Annotated[str, Form()], 
     except Exception as e:
         raise e
       
-@adminapi.get("/docs",tags=["get docs"], include_in_schema=False)
+"""@adminapi.get("/docs",tags=["get docs"], include_in_schema=False)
 async def getdoc():
-    """
-    Get Fastapi admin docs with authentication
-
-    Returns:
-        html: fastapi docs html
-        redirect: access denied, redirect to api docs
-    """
     try:
-        """token = request._cookies.get("token")
-        username = await authcontroller.verify_admin(token=token)"""
         return get_swagger_ui_html(openapi_url="/admin/admin.json", title="Admin apis docs")
     except Exception:
         return RedirectResponse("/docs")
         
 @adminapi.get("/admin.json",tags=["get docs"], include_in_schema=False)
 async def openapijson():
-    """
-    create openapi.json docs
-
-    Returns:
-        html_json: openapi.json
-    """
-    """token = request._cookies.get("token")
-    username = await authcontroller.verify_admin(token=token)"""
-    return adminapi.openapi()
+    return adminapi.openapi()"""

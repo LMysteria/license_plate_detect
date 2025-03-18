@@ -133,7 +133,7 @@ class TransactionDetail(Base):
 class FeedBack(Base):
     __tablename__ = "feedback"
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
-    userid = Column(Integer, ForeignKey("user.id"), unique=True, nullable=False)   
+    userid = Column(Integer, ForeignKey("user.id"), nullable=False)   
     subject = Column(VARCHAR(255), nullable=False)
     detail = Column(VARCHAR(2047), nullable=False)
     
