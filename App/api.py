@@ -12,6 +12,7 @@ from datetime import datetime
 from .auth import authcontroller, authcrud
 from .schema import data
 from .admin.admin import adminapi
+from .router.user.user import userrouter
 
 # Initiate database
 models.Base.metadata.create_all(bind=connectdb.engine)
@@ -19,6 +20,7 @@ models.Base.metadata.create_all(bind=connectdb.engine)
 app = FastAPI(debug=True)
 
 app.mount("/admin", adminapi)
+app.include_router(userrouter)
 
 origins = [
     "http://localhost.tiangolo.com",
@@ -182,11 +184,3 @@ def get_images_type(datasetid:Annotated[int, Path()], type: Annotated[str, Path(
     for i in range(len(data)):
         data[i] = {"image":data[i][0], "label":data[i][1]}
     return data
-
-@app.get("/get/details/{userid}", tags=["Get"])
-def get_userdetails(userid: Annotated[int, Path()]):
-    return authcrud.get_userdetails_by_userid(userid=userid)
-
-@app.get("/get/user", tags=["Get"])
-async def get_current_user(user: Annotated[data.User, Depends(authcontroller.get_current_user)]):
-    return user

@@ -3,6 +3,7 @@ from typing import Annotated
 from datetime import datetime
 import time
 from ..util import time_message
+from ..router.user.usercrud import get_userdetails_by_userid
 
 #GET
 def get_user_by_username(username:str) -> models.User:
@@ -31,14 +32,6 @@ def get_role_by_id(id:int) -> models.Role:
     with connectdb.session() as db:
         response = db.query(models.Role).filter(models.Role.id == id).first()
         time_message("Get role with id {} execution time".format(id), time.time()-start)
-    return response
-        
-def get_userdetails_by_userid(userid:int) -> models.UserDetail:
-    start = time.time()
-    
-    with connectdb.session() as db:
-        response = db.query(models.UserDetail).filter(models.UserDetail.id == userid).first()
-    time_message("Get userdetails with id {} execution time".format(userid), time.time()-start)
     return response
 
 def get_access_by_name(name:str) -> models.Access:
@@ -90,7 +83,7 @@ def create_user_details(userid:int) -> models.UserDetail:
     try:
         with connectdb.session() as db:
             db_userrole = get_role_by_name(name="user")
-            db_userdetails = models.UserDetail(id=userid, roleid=db_userrole.id)
+            db_userdetails = models.UserDetail(id=userid, roleid=db_userrole.id, balance=0)
             db.add(db_userdetails)
             db.commit()
             db.refresh(db_userdetails)

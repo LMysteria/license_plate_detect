@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request, Depends, Form
 from fastapi.responses import RedirectResponse
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import JSONResponse
@@ -11,7 +11,7 @@ adminapi = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, servers=[{"u
 #TODO: Admin page, function
 
 @adminapi.put("/role/setrole", tags=["Users"])
-def set_role(username:str, rolename: str, admin: Annotated[data.User, Depends(authcontroller.check_adminpage_access)]):
+def set_role(username:Annotated[str, Form()], rolename: Annotated[str, Form()], admin: Annotated[data.User, Depends(authcontroller.check_adminpage_access)]):
     """
     Set user's role level
 
