@@ -11,7 +11,7 @@ def get_user_by_username(username:str) -> models.User:
     
     with connectdb.session() as db:
         response = db.query(models.User).filter(models.User.username==username).first()
-    time_message("Get user with username "+username+" execution time", time.time()-start)
+    time_message("Get user with username {} execution time".format(username), time.time()-start)
     return response
 
 def get_user_by_userid(id:int) -> models.User:
@@ -19,7 +19,7 @@ def get_user_by_userid(id:int) -> models.User:
     
     with connectdb.session() as db:
         response = db.query(models.User).filter(models.User.id==id).first()
-    time_message("Get user with id "+id+" execution time", time.time()-start)
+    time_message("Get user with id {} execution time".format(id), time.time()-start)
     return response
 
 def get_role_by_name(name:str) -> models.Role:

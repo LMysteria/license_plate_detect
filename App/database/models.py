@@ -58,12 +58,23 @@ class ParkingLot(Base):
     maxspace = Column(Integer, nullable = False)
     remainingspace = Column(Integer, nullable = False)
     
-    parkinglotdata = relationship("ParkingData", back_populates="fromparkinglot")
+    parkinglotarea = relationship("ParkingArea", back_populates="parkinglotfrom")
+
+class ParkingArea(Base):
+    __tablename__ = "parkingarea"
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
+    area = Column(VARCHAR(255), nullable=False)
+    maxspace = Column(Integer, nullable = False)
+    remainingspace = Column(Integer, nullable = False)
+    parkinglotid = Column(Integer, ForeignKey("parkinglot.id"), nullable=False)
+    
+    parkingareadata = relationship("ParkingData", back_populates="fromparkingarea")
+    parkinglotfrom = relationship("ParkingLot", back_populates="parkinglotarea")
 
 class ParkingData(Base):
     __tablename__ = "parkingdata"
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
-    parkinglotid = Column(Integer, ForeignKey("parkinglot.id"), nullable=False)
+    parkingareaid = Column(Integer, ForeignKey("parkingarea.id"), nullable=False)
     license = Column(CHAR(20), nullable=False)
     entry_img = Column(Integer, ForeignKey("image.id"), nullable=False)
     entry_time = Column(DATETIME, nullable=False)
@@ -72,7 +83,7 @@ class ParkingData(Base):
     
     enimage = relationship("Image", back_populates="entryimage", foreign_keys=[entry_img])
     eximage = relationship("Image", back_populates="exitimage", foreign_keys=[exit_img])
-    fromparkinglot = relationship("ParkingLot", back_populates="parkinglotdata")
+    fromparkingarea = relationship("ParkingArea", back_populates="parkingareadata")
     transactiondata = relationship("TransactionDetail", back_populates="transaction_parking_data")
 
 class Payment(Base):
@@ -122,7 +133,7 @@ class UserDetail(Base):
 class TransactionDetail(Base):
     __tablename__ = "transactiondetail"
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
-    userid = Column(Integer, ForeignKey("user.id"), unique=True, nullable=False)
+    userid = Column(Integer, ForeignKey("user.id"), nullable=False)
     balancechanges = Column(Double)
     description = Column(VARCHAR(255))
     parkingdataid = Column(Integer, ForeignKey("parkingdata.id"), nullable=False)
