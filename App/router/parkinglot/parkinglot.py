@@ -14,16 +14,16 @@ def get_parkinglot_detail(parkinglotid:Annotated[int, Path()]):
     return parkinglotcrud.get_parkinglot_by_id(id=parkinglotid)
 
 @parkinglotrouter.post("/create")
-def create_parkinglot(address:Annotated[str, Form()], maxspace:Annotated[int, Form()], remainingspace:Annotated[int, Form()]):
-    return parkinglotcrud.create_parkinglot(address=address, maxspace=maxspace, remainingspace=remainingspace)
+def create_parkinglot(address:Annotated[str, Form()], dayfeemotorbike:Annotated[float, Form()], nightfeemotorbike:Annotated[float, Form()], carfee:Annotated[float, Form()]):
+    return parkinglotcrud.create_parkinglot(address=address, dayfeemotorbike=dayfeemotorbike, nightfeemotorbike=nightfeemotorbike, carfee=carfee)
 
 @parkinglotrouter.get("/parkingarea/{parkingareaid}")
 def get_parkinglot_detail(parkingareaid:Annotated[int, Path()]):
     return parkinglotcrud.get_parkingarea_by_id(id=parkingareaid)
 
 @parkinglotrouter.post("/parkingarea/create")
-def create_parkinglot(area:Annotated[str, Form()], maxspace:Annotated[int, Form()], remainingspace:Annotated[int, Form()], parkinglotid: Annotated[int, Form()]):
-    return parkinglotcrud.create_parkingarea(area=area, maxspace=maxspace, remainingspace=remainingspace, parkinglotid=parkinglotid)
+def create_parkinglot(area:Annotated[str, Form()], maxspace:Annotated[int, Form()], remainingspace:Annotated[int, Form()], parkinglotid: Annotated[int, Form()], iscar: Annotated[bool, Form()]):
+    return parkinglotcrud.create_parkingarea(area=area, maxspace=maxspace, remainingspace=remainingspace, parkinglotid=parkinglotid, iscar=iscar)
 
 @parkinglotrouter.post("/{parkingareaid}/parkingdata/create/entry")
 def parking_entry(img: UploadFile, parkingareaid: Annotated[int, Path()], userid: int):

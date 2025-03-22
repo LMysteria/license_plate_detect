@@ -2,6 +2,8 @@ from . import connectdb, models
 from typing import Annotated
 from datetime import datetime
 import time
+from sqlalchemy.sql.functions import now
+
 
 def get_image_byID(image_id: int) -> models.Image:
     start = time.time()
@@ -191,11 +193,11 @@ def create_dataset(dataset_name: str) -> models.Dataset:
         print("Create Dataset SQL Execution time: {}s".format(round(time.time()-start, 4)))
         return db_dataset
     
-def parking_entry(license_number:str, entry_image_id: int, entry_datetime: datetime, parkingareaid:int):
+def parking_entry(license_number:str, entry_image_id: int, parkingareaid:int):
     start = time.time()
 
     with connectdb.session() as db:
-        dbparkingdata = models.ParkingData(license=license_number, entry_img=entry_image_id, entry_time=entry_datetime, parkingareaid=parkingareaid)
+        dbparkingdata = models.ParkingData(license=license_number, entry_img=entry_image_id, entry_time=now(), parkingareaid=parkingareaid)
         db.add(dbparkingdata)
         db.commit()
         db.refresh(dbparkingdata)
@@ -254,13 +256,13 @@ def bulk_create_yololabel(list_yolov5label: list[dict]):
         return False        
     
 #UPDATE
-def parking_exit(license_number:str, exit_image: models.Image, exit_datetime: datetime, parkingareaid:int):
+def parking_exit(license_number:str, exit_image: models.Image, parkingareaid:int):
     start = time.time()
 
     with connectdb.session() as db:
         dbparkingdata = get_last_parkingdata_by_licensenumber(licensenumber=license_number, parkingareaid=parkingareaid)
         dbparkingdata.eximage=exit_image
-        dbparkingdata.exit_time = exit_datetime
+        dbparkingdata.exit_time = now()
         db.add(dbparkingdata)
         db.commit()
         db.refresh(dbparkingdata)

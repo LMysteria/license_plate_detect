@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, CHAR, ForeignKey, VARCHAR, Double, DATETIME, Table
+from sqlalchemy import Column, Integer, CHAR, ForeignKey, VARCHAR, Double, DATETIME, Table, Boolean
 from sqlalchemy.orm import relationship
 from .connectdb import Base
 
@@ -55,8 +55,9 @@ class ParkingLot(Base):
     __tablename__ = "parkinglot"
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
     address = Column(VARCHAR(255), nullable=False)
-    maxspace = Column(Integer, nullable = False)
-    remainingspace = Column(Integer, nullable = False)
+    dayfeemotorbike = Column(Double)        #per 4 hour
+    nightfeemotorbike = Column(Double)      #per 4 hour
+    carfee = Column(Double)                 #per 4 hour
     
     parkinglotarea = relationship("ParkingArea", back_populates="parkinglotfrom")
 
@@ -66,6 +67,7 @@ class ParkingArea(Base):
     area = Column(VARCHAR(255), nullable=False)
     maxspace = Column(Integer, nullable = False)
     remainingspace = Column(Integer, nullable = False)
+    iscar = Column(Boolean, nullable=False)
     parkinglotid = Column(Integer, ForeignKey("parkinglot.id"), nullable=False)
     
     parkingareadata = relationship("ParkingData", back_populates="fromparkingarea")
