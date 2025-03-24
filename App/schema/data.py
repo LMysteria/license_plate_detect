@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Annotated
+from datetime import datetime
 
 class DetectedLicense(BaseModel):
     license_number: str
@@ -16,3 +17,4 @@ class User(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    expire: datetime

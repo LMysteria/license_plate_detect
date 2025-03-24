@@ -118,7 +118,7 @@ def create_access_token(data: dict) -> str:
     expire = get_expires_datetime()
     to_encode.update({"exp":expire})
     encoded_jwt = jwt.encode(to_encode, get_SECRET_KEY(), algorithm=authconfig.ALGORITHM)
-    return encoded_jwt
+    return {"jwt":encoded_jwt, "exp":expire}
 
 #authenticate user
 async def authenticate_user(username: str, password: str) -> data.Token:
@@ -147,7 +147,7 @@ async def authenticate_user(username: str, password: str) -> data.Token:
             raise unauthorized_msg
         userdata = {"sub":db_user.username}
         access_token = create_access_token(data=userdata)
-        return data.Token(access_token=access_token, token_type="bearer")
+        return data.Token(access_token=access_token["jwt"], token_type="bearer", expire=access_token["exp"])
     except Exception as error:
         raise error
 
@@ -182,6 +182,6 @@ async def check_adminpage_access(user: Annotated[data.User, Depends(get_current_
         for access in dbroleAccess:
             if access.id == dbadminpage.id:
                 return user
-        raise e
+        raise access_exception
     except Exception as e:
         raise e
