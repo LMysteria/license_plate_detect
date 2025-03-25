@@ -56,14 +56,17 @@ def signup_user(username:str, password:str):
     Returns:
         models.User: User data (id, username, hashedpassword)
     """
-    pattern = r"[a-zA-z0-9]+"
+    pattern = r"[a-zA-z0-9]{6,}"
     check_username = re.match(pattern=pattern,string=username)
     if(username==None or username==""):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Username must not be empty")
+    if(not check_username):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Username must contain atleast 6 character and only non-special character")
     if(check_username[0] != username):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Username must contain only non-special character")
+                            detail="Username must contain atleast 6 character and only non-special character")
     print(14)
     db_user = authcrud.get_user_by_username(username)
     if(password==None or password==""):

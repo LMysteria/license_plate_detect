@@ -54,6 +54,7 @@ class YoloLabel(Base):
 class ParkingLot(Base):
     __tablename__ = "parkinglot"
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
+    name = Column(VARCHAR(255), nullable=False)
     address = Column(VARCHAR(255), nullable=False)
     dayfeemotorbike = Column(Double)        #per 4 hour
     nightfeemotorbike = Column(Double)      #per 4 hour

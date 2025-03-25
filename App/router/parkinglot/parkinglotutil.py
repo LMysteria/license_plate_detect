@@ -9,6 +9,7 @@ from ..user import usercrud
 from ...auth import authcrud
 from . import parkinglotcrud
 from dateutil.relativedelta import relativedelta
+from ...schema import data
 
 def parking_entry(img: UploadFile, parkingareaid:int, userid:int):
     imgtime = datetime.now()
@@ -91,4 +92,17 @@ def isday(vartime: datetime) -> bool:
 def feecalculator(feetype:float, parkinghour:int):
     return feetype*((parkinghour//4)+1)
 
-
+def parkinglotlist(search: str = None, skip: int = 0, limit: int = 10):
+    response = list[data.ParkingLot]()
+    if not search:
+        dbresponse = parkinglotcrud.get_parkinglot_list(skip=skip, limit=limit)
+    else:
+        dbresponse = parkinglotcrud.get_parkinglot_list(searchpattern="%{}%".format(search),skip=skip, limit=limit)
+    
+    for parkinglot in dbresponse:
+        parkinglottuple = parkinglot.tuple()
+        print(parkinglottuple)
+        parkinglotdata = parkinglottuple[0]
+        response.append(data.ParkingLot(name=parkinglotdata.name, address=parkinglotdata.address, dayfeemotorbike=parkinglotdata.dayfeemotorbike, nightfeemotorbike=parkinglotdata.nightfeemotorbike, carfee=parkinglotdata.carfee, remainingspace=parkinglottuple[1]))
+        
+    return response

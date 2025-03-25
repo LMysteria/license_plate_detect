@@ -18,3 +18,11 @@ class Token(BaseModel):
     access_token: str
     token_type: str
     expire: datetime
+    
+class ParkingLot(BaseModel):
+    name: str
+    address: str
+    dayfeemotorbike: float
+    nightfeemotorbike: float
+    carfee: float
+    remainingspace: int

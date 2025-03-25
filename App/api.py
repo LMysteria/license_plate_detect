@@ -13,6 +13,7 @@ from .auth import authcontroller, authcrud
 from .schema import data
 from .admin.admin import adminapi
 from .router.user.user import userrouter
+from .router.parkinglot.parkinglot import ParkinglotUserrouter
 
 # Initiate database
 models.Base.metadata.create_all(bind=connectdb.engine)
@@ -21,6 +22,7 @@ app = FastAPI(debug=True)
 
 app.mount("/admin", adminapi)
 app.include_router(userrouter)
+app.include_router(ParkinglotUserrouter)
 
 origins = [
     "http://localhost.tiangolo.com",

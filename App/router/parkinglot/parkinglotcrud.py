@@ -2,6 +2,7 @@ from ...database import connectdb, models
 from ...schema import data
 from ...util import time_message
 import time
+from sqlalchemy import func
 
 #GET
 def get_parkinglot_by_id(id:int) -> models.ParkingLot:
@@ -17,6 +18,26 @@ def get_parkingarea_by_id(id:int) -> models.ParkingArea:
         with connectdb.session() as db:
             dbparkingarea = db.query(models.ParkingArea).filter(models.ParkingArea.id==id).first()
             return dbparkingarea
+    except Exception as e:
+        raise e
+    
+def get_parkinglot_list(searchpattern: str = None, skip: int=0, limit: int=10):
+    try:
+        with connectdb.session() as db:
+            if not searchpattern:
+                return db.query(models.ParkingLot,func.sum(models.ParkingArea.remainingspace).label("remainingspace")
+                                ).join(models.ParkingArea
+                                ).group_by(models.ParkingArea.parkinglotid                                
+                                ).offset(offset=skip
+                                ).limit(limit=limit
+                                ).all()
+            return db.query(models.ParkingLot,func.sum(models.ParkingArea.remainingspace).label("remainingspace")
+                            ).join(models.ParkingArea
+                            ).filter(models.ParkingLot.name.like(searchpattern)
+                            ).group_by(models.ParkingArea.parkinglotid
+                            ).offset(offset=skip
+                            ).limit(limit=limit
+                            ).all()
     except Exception as e:
         raise e
 
@@ -47,10 +68,10 @@ def areacheckout(parkingareaid:int) -> models.ParkingArea:
         raise e
 
 #CREATE
-def create_parkinglot(address:str, dayfeemotorbike: float, nightfeemotorbike: float, carfee: float):
+def create_parkinglot(name:str, address:str, dayfeemotorbike: float, nightfeemotorbike: float, carfee: float):
     try:
         with connectdb.session() as db:
-            newparkinglot = models.ParkingLot(address=address, dayfeemotorbike=dayfeemotorbike, nightfeemotorbike=nightfeemotorbike, carfee=carfee)
+            newparkinglot = models.ParkingLot(name=name, address=address, dayfeemotorbike=dayfeemotorbike, nightfeemotorbike=nightfeemotorbike, carfee=carfee)
             db.add(newparkinglot)
             db.commit()
             db.refresh(newparkinglot)

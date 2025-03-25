@@ -40,7 +40,7 @@ const Login = () => {
 
     return(
     <div>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} method="POST">
             <label>Username</label>
             <input 
             type="text" 
