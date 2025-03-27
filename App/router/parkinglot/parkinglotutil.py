@@ -92,7 +92,7 @@ def isday(vartime: datetime) -> bool:
 def feecalculator(feetype:float, parkinghour:int):
     return feetype*((parkinghour//4)+1)
 
-def parkinglotlist(search: str = None, skip: int = 0, limit: int = 10):
+def parkinglotlist(search: str = "", skip: int = 0, limit: int = 10):
     response = list[data.ParkingLot]()
     if not search:
         dbresponse = parkinglotcrud.get_parkinglot_list(skip=skip, limit=limit)
@@ -103,6 +103,6 @@ def parkinglotlist(search: str = None, skip: int = 0, limit: int = 10):
         parkinglottuple = parkinglot.tuple()
         print(parkinglottuple)
         parkinglotdata = parkinglottuple[0]
-        response.append(data.ParkingLot(name=parkinglotdata.name, address=parkinglotdata.address, dayfeemotorbike=parkinglotdata.dayfeemotorbike, nightfeemotorbike=parkinglotdata.nightfeemotorbike, carfee=parkinglotdata.carfee, remainingspace=parkinglottuple[1]))
+        response.append(data.ParkingLot(id=parkinglotdata.id,name=parkinglotdata.name, address=parkinglotdata.address, dayfeemotorbike=parkinglotdata.dayfeemotorbike, nightfeemotorbike=parkinglotdata.nightfeemotorbike, carfee=parkinglotdata.carfee, car_remaining_space=parkinglottuple[1], motorbike_remaining_space=parkinglottuple[2]))
         
     return response

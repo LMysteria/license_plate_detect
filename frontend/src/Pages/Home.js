@@ -55,13 +55,14 @@ const Home = () => {
     const Parkinglot = () => {
         if(parkinglotlist.length>0){
             const parkinglots = parkinglotlist.map((val) => (
-                <div key={val.name}>
+                <div key={val.id}>
                     <p>Name: {val.name}</p>
                     <p>Address: {val.address}</p>
                     <p>Day Motorbike Fee: {val.dayfeemotorbike}</p>
                     <p>Night Motorbike Fee: {val.nightfeemotorbike}</p>
                     <p>Car Fee: {val.carfee}</p>
-                    <p>Remaining Space: {val.remainingspace}</p>
+                    <p>Car Remaining Space: {val.car_remaining_space}</p>
+                    <p>Motorbike Remaining Space: {val.motorbike_remaining_space}</p>
                 </div>
             ));
 

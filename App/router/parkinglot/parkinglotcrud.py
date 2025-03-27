@@ -21,23 +21,29 @@ def get_parkingarea_by_id(id:int) -> models.ParkingArea:
     except Exception as e:
         raise e
     
-def get_parkinglot_list(searchpattern: str = None, skip: int=0, limit: int=10):
+def get_parkinglot_list(searchpattern: str = "%%", skip: int=0, limit: int=10):
     try:
         with connectdb.session() as db:
-            if not searchpattern:
-                return db.query(models.ParkingLot,func.sum(models.ParkingArea.remainingspace).label("remainingspace")
-                                ).join(models.ParkingArea
-                                ).group_by(models.ParkingArea.parkinglotid                                
-                                ).offset(offset=skip
-                                ).limit(limit=limit
-                                ).all()
-            return db.query(models.ParkingLot,func.sum(models.ParkingArea.remainingspace).label("remainingspace")
-                            ).join(models.ParkingArea
+            
+            car_remaing_space = db.query(models.ParkingArea.parkinglotid, func.sum(models.ParkingArea.remainingspace).label("car_remaining_space")
+                                        ).filter(models.ParkingArea.iscar == 1   
+                                        ).group_by(models.ParkingArea.parkinglotid
+                                        ).subquery()
+                                        
+            motorbike_remaing_space = db.query(models.ParkingArea.parkinglotid, func.sum(models.ParkingArea.remainingspace).label("motorbike_remaining_space")
+                                        ).filter(models.ParkingArea.iscar == 0   
+                                        ).group_by(models.ParkingArea.parkinglotid
+                                        ).subquery()
+            
+            dbparkinglist = db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
+                            ).join(car_remaing_space, car_remaing_space.c.parkinglotid == models.ParkingLot.id
+                            ).join(motorbike_remaing_space, motorbike_remaing_space.c.parkinglotid == models.ParkingLot.id
                             ).filter(models.ParkingLot.name.like(searchpattern)
-                            ).group_by(models.ParkingArea.parkinglotid
                             ).offset(offset=skip
                             ).limit(limit=limit
                             ).all()
+
+            return dbparkinglist
     except Exception as e:
         raise e
 

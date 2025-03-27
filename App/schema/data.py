@@ -20,9 +20,11 @@ class Token(BaseModel):
     expire: datetime
     
 class ParkingLot(BaseModel):
+    id: int
     name: str
     address: str
     dayfeemotorbike: float
     nightfeemotorbike: float
     carfee: float
-    remainingspace: int
+    car_remaining_space: int
+    motorbike_remaining_space: int

@@ -35,6 +35,6 @@ def parking_exit(img: UploadFile, parkingareaid: Annotated[int, Path()], userid:
     return parkinglotutil.parking_exit(img=img, parkingareaid=parkingareaid, userid=userid)
 
 @ParkinglotUserrouter.get("/list")
-def get_parkinglot_list(search: str = None, skip: int = 0, limit: int = 10):
+def get_parkinglot_list(search: str = "", skip: int = 0, limit: int = 10):
     response = parkinglotutil.parkinglotlist(search=search, skip=skip,limit=limit)
     return response
