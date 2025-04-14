@@ -11,7 +11,7 @@ userrouter = APIRouter(prefix="/user", tags=["user"], dependencies=[Depends(auth
 
 @userrouter.get("/detail")
 def get_userdetails(user: Annotated[data.User, userrouter.dependencies[0]]):
-    return usercrud.get_userdetails_by_userid(userid=user.id)
+    return userutil.get_user_detail(user=user)
 
 @userrouter.get("/account")
 def get_current_user(user: Annotated[data.User, userrouter.dependencies[0]]):
@@ -24,7 +24,12 @@ def insert_money_to_balance(user: Annotated[data.User, userrouter.dependencies[0
     
 @userrouter.post("/balance/payment")
 def payment(user: Annotated[data.User, userrouter.dependencies[0]], payment: Annotated[float, Form()]):
-    response = userutil.increasechange(username=user.username, change=payment)
+    response = userutil.decreasechange(username=user.username, change=payment)
+    return response
+
+@userrouter.post("/detail/update/phonenumber")
+def update_phonenumber(user: Annotated[data.User, userrouter.dependencies[0]], phonenumber: Annotated[str, Form()]):
+    response = userutil.update_user_phonenumber(username=user.username, phonenumber=phonenumber)
     return response
 
 @userrouter.post("/feedback/create")

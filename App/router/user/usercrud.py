@@ -19,8 +19,15 @@ def get_transaction_by_userid_parkingid(userid:int, parkingdataid:int) -> models
     time_message("Get transaction with userid {} and parkingdataid {} execution time".format(userid, parkingdataid), time.time()-start)
     return response
 
+def get_transaction_by_parkingid(parkingdataid:int) -> models.TransactionDetail:
+    start = time.time()
+    with connectdb.session() as db:
+        response = db.query(models.TransactionDetail).filter(models.TransactionDetail.parkingdataid == parkingdataid).first()
+    time_message("Get transaction with parkingdataid {} execution time".format(parkingdataid), time.time()-start)
+    return response
+
 #UPDATE
-def update_userbalance_by_userid(user:models.User, balancechange:float) -> models.UserDetail:
+def update_userbalance(user:models.User, balancechange:float) -> models.UserDetail:
     """update balance
 
     Args:
@@ -50,6 +57,18 @@ def update_transaction_change(parkingdataid:int, userid:int, change:float):
         db.refresh(dbtransaction)
         time_message("Update Transaction \"change\" to {} with userid {} and parkingdataid {} ".format(round(change,2), userid, parkingdataid), time.time()-start)
     return dbtransaction
+
+def update_userphonenumber(user:models.User, phonenumber:str):
+    start = time.time()
+    with connectdb.session() as db:
+        dbuserdetail = get_userdetails_by_userid(userid=user.id)
+        dbuserdetail.phonenumber = phonenumber
+        db.add(dbuserdetail)
+        db.commit()
+        db.refresh(dbuserdetail)
+        time_message("User with username {} change phonenumber to {}".format(user.username, phonenumber), time.time()-start)
+    return dbuserdetail
+    
     
 
 #CREATE

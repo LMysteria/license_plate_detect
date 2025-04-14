@@ -36,3 +36,56 @@
     transform: rotate(360deg);
   }
 }
+
+.signUp ,.Login{
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  margin-top: 10em;
+  gap: 1em;
+}
+
+.signUp form, .Login form{
+  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  margin:auto;
+}
+
+form div label{
+  display: inline-block;
+  width: 7em;
+  margin-right: 1em;
+  text-align: right;
+}
+
+.header{
+  padding: 0.5em 2em 1em 2em;
+  border-bottom: 1px solid black;
+  margin-bottom: 1em;
+}
+
+.userInfo{
+  float: right;
+}
+
+.parkinglotitem{
+  border: 1px solid black;
+  border-radius: 1em;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 0 1em;
+}
+
+.userDetail{
+    margin: 0 auto;
+    width: fit-content;
+}
+
+.parkinglotitem{
+  display: flex;
+  flex-direction: row;
+  gap: 2em;
+  padding: 1em;
+}

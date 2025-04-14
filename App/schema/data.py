@@ -14,6 +14,12 @@ class User(BaseModel):
     id: int
     username: str
     
+class UserDetail(BaseModel):
+    id: int
+    phonenumber: str
+    balance: float
+    role: str
+    
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -28,3 +34,4 @@ class ParkingLot(BaseModel):
     carfee: float
     car_remaining_space: int
     motorbike_remaining_space: int
+    image_path: str

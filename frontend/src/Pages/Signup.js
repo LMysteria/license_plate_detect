@@ -1,6 +1,7 @@
 import { useState } from "react"
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Signup = () => {
     const [input, setInputs] = useState("");
@@ -80,35 +81,42 @@ const Signup = () => {
 
 
     return(
-    <div>
+    <div className="signUp">
+        <h1>Sign Up</h1>
         <form onSubmit={handleSubmit} method="POST">
-            <label>Username</label>
-            <input 
-            type="text" 
-            name="username"
-            value={input.username || ""}
-            onChange={handleChange}
-            />
-            <br />
+            <div>
+                <label>Username</label>
+                <input 
+                type="text" 
+                name="username"
+                value={input.username || ""}
+                onChange={handleChange}
+                />
+            </div>
+            <div>
             <label>Password</label>
-            <input 
-            type="password" 
-            name="password"
-            value={input.password || ""}
-            onChange={handleChange}
-            />
-            <br />
-            <label>Confirm Password</label>
-            <input 
-            type="password" 
-            name="confirmpassword"
-            value={input.confirmpassword || ""}
-            onChange={handleChange}
-            />
-            <br />
+                <input 
+                type="password" 
+                name="password"
+                value={input.password || ""}
+                onChange={handleChange}
+                />
+            </div>
+            <div>
+                <label>Confirm Password</label>
+                <input 
+                type="password" 
+                name="confirmpassword"
+                value={input.confirmpassword || ""}
+                onChange={handleChange}
+                />
+            </div>
             <button type="submit">Signup</button>
         </form>
-        <p>{warning}</p>
+        <span>{warning}</span>
+        <div>
+        <span>Have an account? </span><Link to="/login">Login</Link>
+        </div>
     </div>
     )
 }

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
     const [input, setInputs] = useState("");
@@ -39,27 +39,33 @@ const Login = () => {
 
 
     return(
-    <div>
+    <div className="Login">
+        <h1>Login</h1>
         <form onSubmit={handleSubmit} method="POST">
-            <label>Username</label>
-            <input 
-            type="text" 
-            name="username"
-            value={input.username || ""}
-            onChange={handleChange}
-            />
-            <br />
-            <label>Password</label>
-            <input 
-            type="password" 
-            name="password"
-            value={input.password || ""}
-            onChange={handleChange}
-            />
-            <br />
-            <button type="submit">Login</button>
+            <div>
+                <label>Username</label>
+                <input 
+                type="text" 
+                name="username"
+                value={input.username || ""}
+                onChange={handleChange}
+                />
+            </div>
+            <div>
+                <label>Password</label>
+                <input 
+                type="password" 
+                name="password"
+                value={input.password || ""}
+                onChange={handleChange}
+                />
+            </div>
+            <button type="submit" className="submit">Login</button>
         </form>
-        <p>{warning}</p>
+        <span>{warning}</span>
+        <div>
+            <span>Don't have an account? </span><Link to="/signup">Create account</Link>
+        </div>
     </div>
     )
 }

@@ -8,6 +8,7 @@ from fastapi import UploadFile
 from .database import crud, models
 import yaml
 import time
+from datetime import datetime
 
 def save_upload_file_tmp(upload_file: UploadFile) -> Path:
     try:
@@ -106,3 +107,17 @@ def import_yolo_dataset(file: UploadFile, datasetname: str):
 
 def time_message(message:str, time:time):
     print(message+": {}s".format(round(time, 4)))
+    
+def image_autonaming(img: UploadFile, destination_directory:str, admin_perm:bool=False) -> str:
+    staticprefix = "static"
+    
+    if(admin_perm):
+        staticprefix = "adminstatic"
+    
+    imgtime = datetime.now()
+    datetimename = str(imgtime).replace(" ","_").replace(":","_").replace("-","_").replace(".","_")
+    img.filename = "img{}.png".format(datetimename)
+    
+    relpath = os.path.join(staticprefix,destination_directory, img.filename)
+    return relpath
+

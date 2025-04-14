@@ -1,22 +1,23 @@
 from fastapi import FastAPI, Request, Depends, Form
-from fastapi.responses import RedirectResponse
-from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import JSONResponse
 from typing import Annotated
 from . import adminutil
 from ..schema import data
 from ..auth import authcontroller, authcrud
 from ..router.parkinglot.parkinglot import parkinglotrouter
+from fastapi.staticfiles import StaticFiles
 
 adminapi = FastAPI(servers=[{"url": "/admin"},{"url":""}], dependencies=[Depends(authcontroller.check_adminpage_access)])
 adminapi.include_router(parkinglotrouter)
 #TODO: Admin page, function
 
+adminapi.mount("/adminstatic",StaticFiles(directory="adminstatic"), name="adminstatic")
+
 @adminapi.get("/role/details", tags=["User"])
 def get_role_detail(roleid: int):
     return authcrud.get_role_by_id(id=roleid)
 
-@adminapi.put("/role/setrole", tags=["User"])
+@adminapi.post("/role/setrole", tags=["User"])
 def set_role(username:Annotated[str, Form()], rolename: Annotated[str, Form()]):
     """
     Set user's role level

@@ -56,6 +56,7 @@ class ParkingLot(Base):
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
     name = Column(VARCHAR(255), nullable=False)
     address = Column(VARCHAR(255), nullable=False)
+    imagepath = Column(VARCHAR(255))
     dayfeemotorbike = Column(Double)        #per 4 hour
     nightfeemotorbike = Column(Double)      #per 4 hour
     carfee = Column(Double)                 #per 4 hour
@@ -69,10 +70,19 @@ class ParkingArea(Base):
     maxspace = Column(Integer, nullable = False)
     remainingspace = Column(Integer, nullable = False)
     iscar = Column(Boolean, nullable=False)
+    imagepath = Column(VARCHAR(255))
     parkinglotid = Column(Integer, ForeignKey("parkinglot.id"), nullable=False)
     
     parkingareadata = relationship("ParkingData", back_populates="fromparkingarea")
     parkinglotfrom = relationship("ParkingLot", back_populates="parkinglotarea")
+
+class ManualCheck(Base):
+    __tablename__ = "manualcheck"
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
+    cid_image_path = Column(CHAR(100), unique=True, nullable=False)
+    cavet_image_path = Column(CHAR(100), unique=True, nullable=False)
+    
+    from_parkingdata = relationship("ParkingData", back_populates="manualcheckdata")
 
 class ParkingData(Base):
     __tablename__ = "parkingdata"
@@ -83,11 +93,13 @@ class ParkingData(Base):
     entry_time = Column(DATETIME, nullable=False)
     exit_img = Column(Integer, ForeignKey("image.id"))
     exit_time = Column(DATETIME)
+    manualcheckid = Column(Integer, ForeignKey("manualcheck.id"), unique=True)
     
     enimage = relationship("Image", back_populates="entryimage", foreign_keys=[entry_img])
     eximage = relationship("Image", back_populates="exitimage", foreign_keys=[exit_img])
     fromparkingarea = relationship("ParkingArea", back_populates="parkingareadata")
     transactiondata = relationship("TransactionDetail", back_populates="transaction_parking_data")
+    manualcheckdata = relationship("ManualCheck", back_populates="from_parkingdata")
 
 class Payment(Base):
     __tablename__ = "payment"
@@ -126,7 +138,7 @@ class User(Base):
 class UserDetail(Base):
     __tablename__ = "userdetail"
     id = Column(Integer, ForeignKey("user.id"), primary_key=True, unique=True, nullable=False)
-    phonenumber = Column(CHAR(15))
+    phonenumber = Column(CHAR(10))
     balance = Column(Double)
     roleid = Column(Integer, ForeignKey("role.id"), nullable=False)
     
@@ -139,7 +151,7 @@ class TransactionDetail(Base):
     userid = Column(Integer, ForeignKey("user.id"), nullable=False)
     balancechanges = Column(Double)
     description = Column(VARCHAR(255))
-    parkingdataid = Column(Integer, ForeignKey("parkingdata.id"), nullable=False)
+    parkingdataid = Column(Integer, ForeignKey("parkingdata.id"), nullable=False, unique=True)
     
     transaction_userid = relationship("User", back_populates="usertransaction")
     transaction_parking_data = relationship("ParkingData", back_populates="transactiondata")

@@ -8,4 +8,3 @@ def update_user_role(username: str, rolename: str) -> bool:
         return True
     except Exception as e:
         raise e
-    

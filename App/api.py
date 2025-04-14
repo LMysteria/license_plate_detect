@@ -14,6 +14,7 @@ from .schema import data
 from .admin.admin import adminapi
 from .router.user.user import userrouter
 from .router.parkinglot.parkinglot import ParkinglotUserrouter
+from fastapi.staticfiles import StaticFiles
 
 # Initiate database
 models.Base.metadata.create_all(bind=connectdb.engine)
@@ -21,6 +22,7 @@ models.Base.metadata.create_all(bind=connectdb.engine)
 app = FastAPI(debug=True)
 
 app.mount("/admin", adminapi)
+app.mount("/static",StaticFiles(directory="static"), name="static")
 app.include_router(userrouter)
 app.include_router(ParkinglotUserrouter)
 
@@ -52,7 +54,7 @@ async def login(username: Annotated[str, Form()], password: Annotated[str, Form(
 def detect_license(img: UploadFile = File(...)):
     response = dict()
     start = time.time()
-    relpath = os.path.join("uploadfile", img.filename)
+    relpath = util.image_autonaming(img=img, destination_directory="detectimage")
     fullpath = os.path.join(os.getcwd(),relpath)
     util.save_upload_file(img, Path(fullpath))
     detected = LP_recognition(img_path=relpath)
@@ -157,7 +159,7 @@ def get_role_detail(roleid: int):
 
 from .admin import adminutil
 
-@app.put("/role/setrole", tags=["User"])
+@app.post("/role/setrole", tags=["User"])
 def set_role(username:Annotated[str, Form()], rolename: Annotated[str, Form()]):
     """
     Set user's role level

@@ -2,8 +2,6 @@ from . import connectdb, models
 from typing import Annotated
 from datetime import datetime
 import time
-from sqlalchemy.sql.functions import now
-
 
 def get_image_byID(image_id: int) -> models.Image:
     start = time.time()
@@ -142,17 +140,6 @@ def get_data_by_dataset_sql(dataset_id: int, offset: int = 0, limit: int = 100):
         
         print("Get Data ByDataset raw SQL Execution time: {}s".format(round(time.time()-start, 4)))
         return response
-    
-def get_last_parkingdata_by_licensenumber(licensenumber: str, parkingareaid:int):
-    start = time.time()
-
-    with connectdb.session() as db:
-        response = db.query(models.ParkingData).filter(models.ParkingData.license == licensenumber and 
-                                                       models.ParkingData.parkingareaid==parkingareaid).order_by(models.ParkingData.id.desc()).first()
-        
-        print("Get last parkingdata by licensenumber SQL Execution time: {}s".format(round(time.time()-start, 4)))
-        return response
-    
 
 #CREATE
 def create_image(image_path: str, type: str, dataset_id: Annotated[int, None] = None) -> models.Image:
@@ -192,18 +179,6 @@ def create_dataset(dataset_name: str) -> models.Dataset:
         
         print("Create Dataset SQL Execution time: {}s".format(round(time.time()-start, 4)))
         return db_dataset
-    
-def parking_entry(license_number:str, entry_image_id: int, parkingareaid:int):
-    start = time.time()
-
-    with connectdb.session() as db:
-        dbparkingdata = models.ParkingData(license=license_number, entry_img=entry_image_id, entry_time=now(), parkingareaid=parkingareaid)
-        db.add(dbparkingdata)
-        db.commit()
-        db.refresh(dbparkingdata)
-
-        print("Create ParkingData SQL Execution time: {}s".format(round(time.time()-start, 4)))
-        return dbparkingdata
             
 def bulk_create_image(list_image: list[dict]):
     start = time.time()
@@ -255,17 +230,3 @@ def bulk_create_yololabel(list_yolov5label: list[dict]):
     except:
         return False        
     
-#UPDATE
-def parking_exit(license_number:str, exit_image: models.Image, parkingareaid:int):
-    start = time.time()
-
-    with connectdb.session() as db:
-        dbparkingdata = get_last_parkingdata_by_licensenumber(licensenumber=license_number, parkingareaid=parkingareaid)
-        dbparkingdata.eximage=exit_image
-        dbparkingdata.exit_time = now()
-        db.add(dbparkingdata)
-        db.commit()
-        db.refresh(dbparkingdata)
-        
-        print("Parking Data Update SQL Execution time: {}s".format(round(time.time()-start, 4)))
-        return dbparkingdata
