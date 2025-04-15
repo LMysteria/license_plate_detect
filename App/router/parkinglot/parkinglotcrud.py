@@ -30,6 +30,14 @@ def get_parkingarea_by_id(id:int) -> models.ParkingArea:
     except Exception as e:
         raise e
     
+def get_parkingarea_by_parkinglotid(parkinglotid: int):
+    try:
+        with connectdb.session() as db:
+            dbparkingarea = db.query(models.ParkingArea).filter(models.ParkingArea.parkinglotid==parkinglotid).all()
+            return dbparkingarea
+    except Exception as e:
+        raise e
+    
 def get_parkinglot_list(searchpattern: str = "%%", skip: int=0, limit: int=10):
     try:
         with connectdb.session() as db:
@@ -45,8 +53,8 @@ def get_parkinglot_list(searchpattern: str = "%%", skip: int=0, limit: int=10):
                                         ).subquery()
             
             dbparkinglist = db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
-                            ).join(car_remaing_space, car_remaing_space.c.parkinglotid == models.ParkingLot.id
-                            ).join(motorbike_remaing_space, motorbike_remaing_space.c.parkinglotid == models.ParkingLot.id
+                            ).outerjoin(car_remaing_space, car_remaing_space.c.parkinglotid == models.ParkingLot.id
+                            ).outerjoin(motorbike_remaing_space, motorbike_remaing_space.c.parkinglotid == models.ParkingLot.id
                             ).filter(models.ParkingLot.name.like(searchpattern)
                             ).offset(offset=skip
                             ).limit(limit=limit

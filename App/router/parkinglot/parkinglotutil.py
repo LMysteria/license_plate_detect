@@ -10,6 +10,7 @@ from ...auth import authcrud
 from . import parkinglotcrud
 from dateutil.relativedelta import relativedelta
 from ...schema import data
+from sqlalchemy import null
 
 def parking_entry(img: UploadFile, parkingareaid:int, userid:int):
     try:
@@ -111,7 +112,19 @@ def parkinglotlist(search: str = "", skip: int = 0, limit: int = 10):
         parkinglottuple = parkinglot.tuple()
         print(parkinglottuple)
         parkinglotdata = parkinglottuple[0]
-        response.append(data.ParkingLot(id=parkinglotdata.id,name=parkinglotdata.name, address=parkinglotdata.address, dayfeemotorbike=parkinglotdata.dayfeemotorbike, nightfeemotorbike=parkinglotdata.nightfeemotorbike, carfee=parkinglotdata.carfee, car_remaining_space=parkinglottuple[1], motorbike_remaining_space=parkinglottuple[2], image_path=parkinglotdata.imagepath))
+        
+        dataParkingLot = data.ParkingLot(id=parkinglotdata.id,name=parkinglotdata.name, address=parkinglotdata.address, dayfeemotorbike=parkinglotdata.dayfeemotorbike, nightfeemotorbike=parkinglotdata.nightfeemotorbike, carfee=parkinglotdata.carfee, car_remaining_space=0, motorbike_remaining_space=0, image_path="")
+        
+        if(parkinglottuple[1]):
+            dataParkingLot.car_remaining_space = parkinglottuple[1]
+        
+        if(parkinglottuple[2]):
+            dataParkingLot.motorbike_remaining_space = parkinglottuple[2]
+            
+        if(parkinglotdata.imagepath):
+            dataParkingLot.image_path = parkinglotdata.imagepath
+        
+        response.append(dataParkingLot)
         
     return response
 

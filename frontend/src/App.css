@@ -63,7 +63,7 @@ form div label{
 .header{
   padding: 0.5em 2em 1em 2em;
   border-bottom: 1px solid black;
-  margin-bottom: 1em;
+  margin-bottom: 2em;
 }
 
 .userInfo{
@@ -86,6 +86,31 @@ form div label{
 .parkinglotitem{
   display: flex;
   flex-direction: row;
-  gap: 2em;
+  justify-content: space-between;
   padding: 1em;
+  width: 40em;
+}
+
+.parkinglotitem:hover{
+  cursor: pointer;
+  border-color: blue;
+}
+
+.parkinglot{
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  width: fit-content;
+  margin-left: 5em;
+}
+
+.parkinglotdisplay{
+  display: flex;
+  flex-direction: row;
+  gap: 10em;
+}
+
+.parkinglotimage{
+  width: 17.5em;
+  height: 12em;
 }

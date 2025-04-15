@@ -50,3 +50,8 @@ def parkingdata_manualcheck(cid_img: UploadFile, cavet_img: UploadFile, parkingd
 def get_parkinglot_list(search: str = "", skip: int = 0, limit: int = 10):
     response = parkinglotutil.parkinglotlist(search=search, skip=skip,limit=limit)
     return response
+
+@ParkinglotUserrouter.get("/{parkinglotid}/parkingarea/list")
+def get_parkinglot_list(parkinglotid: Annotated[int, Path()]):
+    response = parkinglotcrud.get_parkingarea_by_parkinglotid(parkinglotid=parkinglotid)
+    return response

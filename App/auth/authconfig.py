@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 #jwt encode config
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 300
 REFRESH_TOKEN_EXPIRE_DAY = 7
 
 #password hash config
