@@ -101,7 +101,6 @@ form div label{
   flex-direction: column;
   gap: 1em;
   width: fit-content;
-  margin-left: 5em;
 }
 
 .parkinglotdisplay{
@@ -113,4 +112,24 @@ form div label{
 .parkinglotimage{
   width: 17.5em;
   height: 12em;
+}
+
+.parkinglotdiv{
+  margin-left: 5em;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.parkinglotsearch{
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+
+.parkinglotsearch input{
+  width: 44.5em;
+  height: 1.5em;
+  border-radius: 1em;
+  padding-left: 0.5em;
 }

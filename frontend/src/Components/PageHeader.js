@@ -10,7 +10,7 @@ const userContext = createContext({});
 
 const PageHeader = (outline) => {
 
-    const [token,] = useState(Cookies.get("__Host-access_token") || "");
+    const [token, setToken] = useState(Cookies.get("Host-access_token") || "");
     const [username, setUsername] = useState("");
     const [detail, setDetail] = useState({});
 
@@ -41,11 +41,17 @@ const PageHeader = (outline) => {
         })
         .catch((err)=>console.log(err))
     }
+
+    const logout = () => {
+        Cookies.remove("Host-access_token",{path:"/"});
+        setToken("");
+    }
+
     return(
         <div>
             <div className="header">
                 <span><Link to="/">Home</Link></span>
-                <span className="userInfo">Welcome <Link to="/userdetail">{username}</Link>, Balance: {detail.balance}</span>
+                <span className="userInfo">Welcome <Link to="/userdetail">{username}</Link>, Balance: {detail.balance}, <button onClick={logout}>Logout</button></span>
             </div>
             <userContext.Provider value={detail}>
                     {outline.children}

@@ -4,18 +4,24 @@ const ParkingLot = () => {
     const [parkinglotlist, setParkinglotlist] = useState([])
     const [clickedParkinglot, setClickedParkinglot] = useState(0)
     const [displayParkingArea, setParkingArea] = useState([])
+    const [input, setInputs] = useState("")
 
-    if(parkinglotlist.length === 0){
-        fetch("http://localhost:8000/parkinglot/list",{
+    const getParkinglotlist = (search="") => {
+        fetch(`http://localhost:8000/parkinglot/list?search=${search}`,{
             method: "GET",
         })
-        .then((response)=>response.json())
-        .then((data)=>{
-            setParkinglotlist(data)
-
-        })
-        .catch((err)=>console.log(err))
+        .then((response) => response.json())
+        .then((data) => setParkinglotlist(data))
+        .catch((err)=> console.log(err))
+        setParkingArea([]);
     }
+
+    useEffect(() => {
+        if(parkinglotlist.length === 0){
+            getParkinglotlist()
+        }
+    }, [parkinglotlist])
+
 
     useEffect(() => {
         if (clickedParkinglot>0){
@@ -44,7 +50,7 @@ const ParkingLot = () => {
                 Car Fee: {val.carfee}<br />
                 Car Remaining Space: {val.car_remaining_space}<br />
                 Motorbike Remaining Space: {val.motorbike_remaining_space}</p>
-                <img src={`http://localhost:8000/${val.image_path}`} alt="No img" className="parkinglotimage"/>
+                <img src={val.image_path? `http://localhost:8000/${val.image_path}`:undefined} alt="No img" className="parkinglotimage"/>
             </div>
     ))
 
@@ -54,17 +60,33 @@ const ParkingLot = () => {
             Type: {val.iscar ? "car":"motorbike"}<br />
             Remaining Space: {val.remainingspace}<br />
             </p>
-            <img src={`http://localhost:8000/${val.imagepath}`} alt="No img" className="parkinglotimage"/>
+            <img src={val.imagepath?`http://localhost:8000/${val.imagepath}`:undefined} alt="No img" className="parkinglotimage"/>
         </div>
 ))
 
+    const  handleChange = (event) => {
+        const name = event.target.name;
+        const value = event.target.value;
+        setInputs(values => ({...values, [name]: value}))
+    }
+
+    const Search = () => {
+        getParkinglotlist(input.searchParkinglot)
+    }
+
     return(
-        <div className="parkinglotdisplay">
-            <div className="parkinglot">
-                {parkinglots}
+        <div className="parkinglotdiv">
+            <div className="parkinglotsearch">
+                <input type="text" name="searchParkinglot" placeholder="parkinglot search" onChange={handleChange} className="ParkinglotSearch"/>
+                <button name="Search" onClick={Search}>Search</button>
             </div>
-            <div className="parkinglot">
-                {parkingareas}
+            <div className="parkinglotdisplay">
+                <div className="parkinglot">
+                    {parkinglots}
+                </div>
+                <div className="parkinglot">
+                    {parkingareas}
+                </div>
             </div>
         </div>
     )

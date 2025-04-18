@@ -31,7 +31,7 @@ const Login = () => {
         .then((data) => {
             console.log(data)
             const expiredate = new Date(data["expire"])
-            Cookies.set("__Host-access_token", data["access_token"], {path:"/", secure:true, expires:expiredate, sameSite:"None"})
+            Cookies.set("Host-access_token", data["access_token"], {path:"/", secure:true, expires:expiredate, sameSite:"None"})
             navigate("/")
         })
         .catch((err) => console.log(err))
