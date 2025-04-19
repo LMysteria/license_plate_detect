@@ -21,12 +21,14 @@ const Signup = () => {
         const checksignup = () => {
             const usernamepattern = /^[a-zA-z0-9]{6,}$/;
             const passwordpattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            const matchedusername = input.username.match(usernamepattern)
+            const matchedpassword = input.password.match(passwordpattern)
 
-            if(input.username !== input.username.match(usernamepattern)[0]){
+            if(matchedusername === null || input.username !== matchedusername[0]){
                 warningmsg += "Username must contain atleast 6 character and no non-special character\n"
             }
 
-            if(input.password !== input.password.match(passwordpattern)[0]){
+            if(matchedpassword === null || input.password !== matchedpassword[0]){
                 warningmsg += "Password must contain atleast 8 character. At least 1 uppercase character. At least 1 lowercase character. At least 1 digit. At least 1 special character\n"
             }
 
@@ -36,7 +38,7 @@ const Signup = () => {
 
             if(warningmsg !== ""){
                 console.log(warningmsg)
-                setWarning (warningmsg)
+                setWarning(warningmsg)
                 return false
             }
             return true
@@ -72,7 +74,7 @@ const Signup = () => {
             .then((data) => {
                 console.log(data)
                 const expiredate = new Date(data["expire"])
-                Cookies.set("__Host-access_token", data["access_token"], {path:"/", secure:true, expires:expiredate, sameSite:"None"})
+                Cookies.set("Host-access_token", data["access_token"], {path:"/", secure:true, expires:expiredate, sameSite:"None"})
                 navigate("/")
             })
         })

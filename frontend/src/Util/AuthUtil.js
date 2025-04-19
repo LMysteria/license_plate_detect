@@ -5,4 +5,4 @@ const getAuthHeader = (token) => {
     }))
 }
 
-export default getAuthHeader
+export {getAuthHeader};

@@ -50,6 +50,10 @@ def signup(username: Annotated[str, Form()], password: Annotated[str, Form()]):
 async def login(username: Annotated[str, Form()], password: Annotated[str, Form()]) -> data.Token:
     return await authcontroller.authenticate_user(username=username, password=password)
 
+@app.get("/checkadmin", tags=["Auth"])
+async def checkadmin(user: Annotated[data.User, Depends(authcontroller.check_adminpage_access)]) -> data.User:
+    return user
+
 @app.post("/detect", tags=["License Detection AI"])
 def detect_license(img: UploadFile = File(...)):
     response = dict()

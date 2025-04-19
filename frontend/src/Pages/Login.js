@@ -32,7 +32,7 @@ const Login = () => {
             console.log(data)
             const expiredate = new Date(data["expire"])
             Cookies.set("Host-access_token", data["access_token"], {path:"/", secure:true, expires:expiredate, sameSite:"None"})
-            navigate("/")
+            navigate(-1)
         })
         .catch((err) => console.log(err))
     }

@@ -1,10 +1,11 @@
-import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
+import {BrowserRouter as Router, Route, Routes, Navigate} from 'react-router-dom';
 import Login from "./Pages/Login";
 import DetectLicense from "./Pages/DetectLicense";
 import Home from "./Pages/Home";
 import SignUp from "./Pages/Signup";
 import UserPage from "./Pages/User";
 import "./App.css";
+import AdminPage from './Pages/Admin';
 
 function App() {
   return(
@@ -15,6 +16,8 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/detectedlicense" element={<DetectLicense />} />
         <Route path="/userdetail" element={<UserPage />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="*" element={<Navigate to="/"/>} />
       </Routes>
     </Router>
   )
