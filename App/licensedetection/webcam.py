@@ -3,21 +3,20 @@ import cv2
 import torch
 import math 
 import function.utils_rotate as utils_rotate
-from IPython.display import display
 import os
 import time
 import argparse
 import function.helper as helper
 
 # load model
-yolo_LP_detect = torch.hub.load('yolov5', 'custom', path='model/LP_detector_nano_61.pt', force_reload=True, source='local')
-yolo_license_plate = torch.hub.load('yolov5', 'custom', path='model/LP_ocr_nano_62.pt', force_reload=True, source='local')
+yolo_LP_detect = torch.hub.load('yolov5', 'custom', path='./App/licensedetection/model/LP_detector_nano_61.pt', force_reload=True, source='local')
+yolo_license_plate = torch.hub.load('yolov5', 'custom', path='./App/licensedetection/model/LP_ocr_nano_62.pt', force_reload=True, source='local')
 yolo_license_plate.conf = 0.60
 
 prev_frame_time = 0
 new_frame_time = 0
 
-vid = cv2.VideoCapture(1)
+vid = cv2.VideoCapture(0)
 # vid = cv2.VideoCapture("1.mp4")
 while(True):
     ret, frame = vid.read()
