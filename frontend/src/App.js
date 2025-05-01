@@ -6,6 +6,7 @@ import SignUp from "./Pages/Signup";
 import UserPage from "./Pages/User";
 import "./App.css";
 import AdminPage from './Pages/Admin';
+import ParkingLotAdmin from './Pages/ParkingLotAdmin';
 
 function App() {
   return(
@@ -17,6 +18,7 @@ function App() {
         <Route path="/detectedlicense" element={<DetectLicense />} />
         <Route path="/userdetail" element={<UserPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path='/admin/parkinglot' element={<ParkingLotAdmin />} />
         <Route path="*" element={<Navigate to="/"/>} />
       </Routes>
     </Router>
