@@ -128,18 +128,21 @@ def parkinglotlist(search: str = "", skip: int = 0, limit: int = 10):
         
     return response
 
-def update_parkinglot_image(img: UploadFile, parkinglotid: int):
-        relpath = util.image_autonaming(img=img, destination_directory="parkinglotimage")
-        fullpath = os.path.join(os.getcwd(),relpath)
-        util.save_upload_file(img, Path(fullpath))
-        parkinglotdb = parkinglotcrud.update_parkinglot_image(img_path=relpath, parkinglotid=parkinglotid)
+def update_parkinglot(parkinglotid: int, name:str, address:str, dayfeemotorbike: float, nightfeemotorbike: float, carfee: float, img: UploadFile):
+        relpath=""
+        if(img):
+            relpath = util.image_autonaming(img=img, destination_directory="parkinglotimage")
+            fullpath = os.path.join(os.getcwd(),relpath)
+            util.save_upload_file(img, Path(fullpath))
+        parkinglotdb = parkinglotcrud.update_parkinglot_image(parkinglotid=parkinglotid, name=name, address=address, 
+                                                              dayfeemotorbike=dayfeemotorbike, nightfeemotorbike=nightfeemotorbike, carfee=carfee, img_path=relpath)
         return parkinglotdb
         
 def update_parkingarea_image(img: UploadFile, parkingareaid: int):
         relpath = util.image_autonaming(img=img, destination_directory="parkinglotimage")
         fullpath = os.path.join(os.getcwd(),relpath)
         util.save_upload_file(img, Path(fullpath))
-        parkingareadb = parkinglotcrud.update_parkingarea_image(img_path=relpath, parkingareaid=parkingareaid)
+        parkingareadb = parkinglotcrud.update_parkingarea_image(parkingareaid=parkingareaid, img_path=relpath)
         return parkingareadb
     
 def manual_check(cid_img: UploadFile, cavet_img: UploadFile, parkingdataid:int):

@@ -112,11 +112,22 @@ def update_parkingdata_manualcheck(parkingdataid:int, manualcheckid:int):
     except Exception as e:
         raise e
         
-def update_parkinglot_image(img_path:str, parkinglotid:int):
+def update_parkinglot(parkinglotid:int, name:str, address:str, dayfeemotorbike: float, nightfeemotorbike: float, carfee: float, img_path:str):
     try:
         with connectdb.session() as db:
             dbparkinglot = get_parkinglot_by_id(id=parkinglotid)
-            dbparkinglot.imagepath = img_path
+            if(name & dbparkinglot.name != name):
+                dbparkinglot.name = name
+            if(address & dbparkinglot.address != address):
+                dbparkinglot.address = address
+            if(dayfeemotorbike & dbparkinglot.dayfeemotorbike != dayfeemotorbike):
+                dbparkinglot.dayfeemotorbike = dayfeemotorbike
+            if(nightfeemotorbike & dbparkinglot.nightfeemotorbike != nightfeemotorbike):
+                dbparkinglot.nightfeemotorbike = nightfeemotorbike
+            if(carfee & dbparkinglot.carfee != carfee):
+                dbparkinglot.carfee = carfee
+            if(img_path):
+                dbparkinglot.imagepath = img_path
             db.add(dbparkinglot)
             db.commit()
             db.refresh(dbparkinglot)
@@ -124,7 +135,7 @@ def update_parkinglot_image(img_path:str, parkinglotid:int):
     except Exception as e:
         raise e
     
-def update_parkingarea_image(img_path:str, parkingareaid:int):
+def update_parkingarea(img_path:str, parkingareaid:int):
     try:
         with connectdb.session() as db:
             dbparkingarea = get_parkingarea_by_id(id=parkingareaid)

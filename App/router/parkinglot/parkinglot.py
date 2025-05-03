@@ -34,11 +34,13 @@ def parking_entry(img: UploadFile, parkingareaid: Annotated[int, Path()], userid
 def parking_exit(img: UploadFile, parkingareaid: Annotated[int, Path()], userid: int):
     return parkinglotutil.parking_exit(img=img, parkingareaid=parkingareaid, userid=userid)
 
-@parkinglotrouter.post("/{parkinglotid}/update/image")
-def update_parkingarea_image(img: UploadFile, parkinglotid: Annotated[int, Path()]):
-    return parkinglotutil.update_parkinglot_image(img=img, parkinglotid=parkinglotid)
+@parkinglotrouter.post("/{parkinglotid}/update")
+def update_parkingarea_image(img: UploadFile, parkinglotid: Annotated[int, Path()], name:Annotated[str, Form()], address:Annotated[str, Form()], 
+                             dayfeemotorbike:Annotated[float, Form()], nightfeemotorbike:Annotated[float, Form()], carfee:Annotated[float, Form()]):
+    return parkinglotutil.update_parkinglot(img=img, parkinglotid=parkinglotid, name=name, address=address,
+                                            dayfeemotorbike=dayfeemotorbike, nightfeemotorbike=nightfeemotorbike, carfee=carfee)
 
-@parkinglotrouter.post("/parkingarea/{parkingareaid}/update/image")
+@parkinglotrouter.post("/parkingarea/{parkingareaid}/update")
 def update_parkingarea_image(img: UploadFile, parkingareaid: Annotated[int, Path()]):
     return parkinglotutil.update_parkingarea_image(img=img, parkingareaid=parkingareaid)
 

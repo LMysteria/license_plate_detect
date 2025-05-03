@@ -41,8 +41,23 @@ const ParkingLotAdmin = () => {
         }
     }, [clickedParkinglot])
 
+    const onCancelEditParkingLot = () => {
+        setEditParkingLot({})
+        setEditParkingLotImage(undefined)
+    }
+
+    const onSaveEditParkingLot = () => {
+        
+    }
+
     const onClickParkingLot = (event) => {
         setClickedParkinglot(event.target.getAttribute("parkinglotid"))
+    }
+
+    const onChangeEditParkingLot = (event) => {
+        const name = event.target.name;
+        const value = event.target.value;
+        setEditParkingLot(values => ({...values, [name]:value}))
     }
 
     const  handleChange = (event) => {
@@ -112,28 +127,28 @@ const ParkingLotAdmin = () => {
             <div className="edit">
                 <h1>Parking Lot Edit</h1>
                 <div>
-                    <label for="name">Name: </label><input type="text" name="parkinglotname" value={editParkingLot.name}/>
+                    <label for="name">Name: </label><input type="text" name="name" value={editParkingLot.name} onChange={onChangeEditParkingLot}/>
                 </div>
                 <div>
-                    <label for="address">Address: </label><input type="text" name="parkinglotaddress" value={editParkingLot.address}/>
+                    <label for="address">Address: </label><input type="text" name="address" value={editParkingLot.address} onChange={onChangeEditParkingLot}/>
                 </div>
                 <div>
-                    <label for="daymotorbikefee">Day Motorbike Fee: </label><input type="text" name="parkinglotmotorbikefee" value={editParkingLot.dayfeemotorbike}/>
+                    <label for="dayfeemotorbike">Day Motorbike Fee: </label><input type="text" name="dayfeemotorbike" value={editParkingLot.dayfeemotorbike} onChange={onChangeEditParkingLot}/>
                 </div>
                 <div>
-                    <label for="nightmotorbikefee">Name: </label><input type="text" name="nightmotorbikefee" value={editParkingLot.nightfeemotorbike}/>
+                    <label for="nightfeemotorbike">Name: </label><input type="text" name="nightfeemotorbike" value={editParkingLot.nightfeemotorbike} onChange={onChangeEditParkingLot}/>
                 </div>
                 <div>
-                    <label for="carfee">Name: </label><input type="text" name="carfee" value={editParkingLot.carfee}/>
+                    <label for="carfee">Name: </label><input type="text" name="carfee" value={editParkingLot.carfee} onChange={onChangeEditParkingLot}/>
                 </div>
-                <img src={editParkingLotImage?URL.createObjectURL(selectedImage):
+                <img src={editParkingLotImage?URL.createObjectURL(editParkingLotImage):
                     (val.imagepath?`http://localhost:8000/${val.imagepath}`:undefined)} alt="No img" className="parkinglotimage"/>
                 <input
                     type="file"
                     name="img"
                     // Event handler to capture file selection and update the state
                     onChange={(event) => {
-                        setSelectedImage(event.target.files[0]); // Update the state with the selected file
+                        setEditParkingLotImage(event.target.files[0]); // Update the state with the selected file
                     }}
                 />
                 <div>
