@@ -14,7 +14,7 @@ const AdminHeader = () => {
         }
 
         if (username===""){
-            fetch("http://localhost:8000/checkadmin",{
+            fetch("http://localhost:8000/admin/",{
                 method: "GET",
                 headers: getAuthHeader(token)
             })
@@ -43,7 +43,7 @@ const AdminHeader = () => {
     }
     return(
         <div className="header">
-            <span><Link to="/">Home </Link><Link to="/admin">Admin</Link></span>
+            <span><Link to="/">Home</Link><span>, </span><Link to="/admin">Admin</Link></span>
             <span className="userInfo">Welcome {username}, <button onClick={logout}>Logout</button></span>
         </div>
     )

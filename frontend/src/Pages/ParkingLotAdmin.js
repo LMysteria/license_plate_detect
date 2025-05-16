@@ -1,69 +1,182 @@
 import { useEffect, useState } from "react";
 import AdminHeader from "../Components/AdminHeader";
+import Cookies from "js-cookie"
+import { getAuthHeader } from "../Util/AuthUtil";
 
 const ParkingLotAdmin = () => {
+    const [token] = useState(Cookies.get("Host-access_token") || "");
     const [parkinglotlist, setParkinglotlist] = useState([])
     const [clickedParkinglot, setClickedParkinglot] = useState(0)
+    const [isCreate, setIsCreate] = useState(true)
+    const [parkingLotForm, setParkingLotForm] = useState({})
+    const [formImage, setFormImage] = useState()
     const [displayParkingArea, setParkingArea] = useState([])
-    const [editParkingLot, setEditParkingLot] = useState({})
-    const [editParkingLotImage, setEditParkingLotImage] = useState()
-    const [editParkingArea, setEditParkingArea] = useState({})
+    const [parkingAreaForm, setParkingAreaForm] = useState({})
     const [input, setInputs] = useState("")
 
-    const getParkinglotlist = (search="") => {
-        fetch(`http://localhost:8000/parkinglot/list?search=${search}`,{
+    const getParkinglotlist = (search = "") => {
+        fetch(`http://localhost:8000/parkinglot/list?search=${search}`, {
             method: "GET",
         })
-        .then((response) => response.json())
-        .then((data) => setParkinglotlist(data))
-        .catch((err)=> console.log(err))
+            .then((response) => response.json())
+            .then((data) => setParkinglotlist(data))
+            .catch((err) => console.log(err))
         setParkingArea([]);
     }
 
     useEffect(() => {
-        if(parkinglotlist.length === 0){
+        if (parkinglotlist.length === 0) {
             getParkinglotlist()
         }
     }, [parkinglotlist])
 
 
     useEffect(() => {
-        if (clickedParkinglot>0){
+        if (clickedParkinglot > 0) {
             fetch(`http://localhost:8000/parkinglot/${clickedParkinglot}/parkingarea/list`, {
                 method: "GET",
             })
-            .then((response) => response.json())
-            .then((data) => {
-                setParkingArea(data)
-                console.log(data)
-            })
-            .catch((err) => console.log(err))
+                .then((response) => response.json())
+                .then((data) => {
+                    setParkingArea(data)
+                    console.log(data)
+                })
+                .catch((err) => console.log(err))
         }
     }, [clickedParkinglot])
 
-    const onCancelEditParkingLot = () => {
-        setEditParkingLot({})
-        setEditParkingLotImage(undefined)
+    const closeForm = () => {
+        setParkingAreaForm({})
+        setParkingLotForm({})
+        setFormImage(undefined)
+        document.getElementById("parkingareaform").style.display="none"
+        document.getElementById("parkinglotform").style.display="none"
+        document.getElementById("editbackground").style.display="none"
     }
 
-    const onSaveEditParkingLot = () => {
-        
+    const onCancelParkingLotForm = () => {
+        closeForm()
+    }
+
+    const onCancelParkingAreaForm = () => {
+        closeForm()
+    }
+
+    const onSaveParkingLotForm = () => {
+        try {
+            const form = new FormData()
+            form.append("name", parkingLotForm.name)
+            form.append("address", parkingLotForm.address)
+            form.append("dayfeemotorbike", parkingLotForm.dayfeemotorbike)
+            form.append("nightfeemotorbike", parkingLotForm.nightfeemotorbike)
+            form.append("carfee", parkingLotForm.carfee)
+            if (formImage) {
+                form.append("img", formImage)
+            };
+            const headers = getAuthHeader(token)
+            console.log(Object.fromEntries(form.entries()))
+            if(isCreate){
+                fetch(`http://localhost:8000/admin/parkinglot/create`, {
+                    method: "POST",
+                    body: form,
+                    headers: headers
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data) {
+                            getParkinglotlist()
+                        }
+                })
+            }
+            else{
+                fetch(`http://localhost:8000/admin/parkinglot/${parkingLotForm.id}/update`, {
+                    method: "POST",
+                    body: form,
+                    headers: headers
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data) {
+                            getParkinglotlist()
+                        }
+                })
+            }
+        } catch (error) {
+            console.error(error)
+        } finally {
+            closeForm()
+        }
+    }
+
+    const onSaveParkingAreaForm = () => {
+        try {
+            const form = new FormData()
+            form.append("area", parkingAreaForm.area)
+            form.append("maxspace", parkingAreaForm.maxspace)
+            form.append("remainingspace", parkingAreaForm.remainingspace)
+            if(parkingAreaForm.iscar == undefined){
+                form.append("iscar", false)}
+            else{
+            form.append("iscar", parkingAreaForm.iscar)}
+            if (formImage) {
+                form.append("img", formImage)
+            };
+            const headers = getAuthHeader(token)
+            console.log(Object.fromEntries(form.entries()))
+            if(isCreate){
+                form.append("parkinglotid",parkingLotForm.id)
+                fetch(`http://localhost:8000/admin/parkinglot/parkingarea/create`, {
+                    method: "POST",
+                    body: form,
+                    headers: headers
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data) {
+                            getParkinglotlist()
+                        }
+                })
+            }else{
+                fetch(`http://localhost:8000/admin/parkinglot/parkingarea/${parkingAreaForm.id}/update`, {
+                    method: "POST",
+                    body: form,
+                    headers: headers
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data) {
+                            getParkinglotlist()
+                        }
+                    })
+            }
+        } catch (error) {
+            console.error(error)
+        } finally {
+            closeForm()
+        }
     }
 
     const onClickParkingLot = (event) => {
         setClickedParkinglot(event.target.getAttribute("parkinglotid"))
     }
 
-    const onChangeEditParkingLot = (event) => {
+    const onChangeParkingLotForm = (event) => {
         const name = event.target.name;
         const value = event.target.value;
-        setEditParkingLot(values => ({...values, [name]:value}))
+        setParkingLotForm(values => ({ ...values, [name]: value }))
     }
 
-    const  handleChange = (event) => {
+    const onChangeParkingAreaForm = (event) => {
         const name = event.target.name;
         const value = event.target.value;
-        setInputs(values => ({...values, [name]: value}))
+        setParkingAreaForm(values => ({ ...values, [name]: value }))
+    }
+
+
+    const handleChange = (event) => {
+        const name = event.target.name;
+        const value = event.target.value;
+        setInputs(values => ({ ...values, [name]: value }))
     }
 
     const Search = () => {
@@ -71,49 +184,74 @@ const ParkingLotAdmin = () => {
     }
 
     const EditParkingLot = (event) => {
-        const parkinglotid = event.target.parentElement.getAttribute("parkinglotid")
-        const parkinglot = parkinglotlist.find((val) => val.id===parkinglotid)
-        setEditParkingLot(parkinglot)
+        const parkinglotid = parseInt(event.target.parentElement.getAttribute("parkinglotid"));
+        const parkinglot = parkinglotlist.find((val) => val.id === parkinglotid);
+        setIsCreate(false)
+        setParkingLotForm(parkinglot)
+        document.getElementById("parkinglotform").style.display="block"
+        document.getElementById("editbackground").style.display="block"
+        console.log(parkinglot)
     }
-    
+
     const EditParkingArea = (event) => {
-        const parkingareaid = event.target.parentElement.getAttribute("parkingareaid")
-        const parkingarea = parkingareas.find((val) => val.id===parkingareaid)
-        setEditParkingArea(parkingarea)
+        const parkingareaid = parseInt(event.target.parentElement.getAttribute("parkingareaid"))
+        const parkingarea = displayParkingArea.find((val) => val.id === parkingareaid);
+        setIsCreate(false)
+        setParkingAreaForm(parkingarea)
+        document.getElementById("parkingareaform").style.display="block"
+        document.getElementById("editbackground").style.display="block"
+        console.log(parkingarea)
+    }
+
+    const createParkingLot = () => {
+        setIsCreate(true)
+        document.getElementById("parkinglotform").style.display="block"
+        document.getElementById("editbackground").style.display="block"
+    }
+
+    const createParkingArea = (event) => {
+        const parkinglotid = parseInt(event.target.parentElement.getAttribute("parkinglotid"));
+        const parkinglot = parkinglotlist.find((val) => val.id === parkinglotid);
+        setParkingLotForm(parkinglot)
+        setIsCreate(true)
+        document.getElementById("parkingareaform").style.display="block"
+        document.getElementById("editbackground").style.display="block"
     }
 
     const parkinglots = parkinglotlist.map((val) => (
-            <div key={val.id} parkinglotid={val.id} className="parkinglotitem" onClick={onClickParkingLot}>
-                <p>Name: {val.name}<br />
+        <div key={val.id} parkinglotid={val.id} className="parkinglotitem" onClick={onClickParkingLot}>
+            <p>Name: {val.name}<br />
                 Address: {val.address}<br />
                 Day Motorbike Fee: {val.dayfeemotorbike}<br />
                 Night Motorbike Fee: {val.nightfeemotorbike}<br />
                 Car Fee: {val.carfee}<br />
                 Car Remaining Space: {val.car_remaining_space}<br />
                 Motorbike Remaining Space: {val.motorbike_remaining_space}</p>
-                <img src={val.image_path? `http://localhost:8000/${val.image_path}`:undefined} alt="No img" className="parkinglotimage"/>
-                <button type="button" onClick={EditParkingLot}>Edit</button>
-            </div>
+            <img src={val.image_path ? `http://localhost:8000/${val.image_path}` : undefined} alt="No img" className="parkinglotimage" />
+            <button type="button" onClick={EditParkingLot}>Edit</button>
+            <button type="button" onClick={createParkingArea}>Create Parking Area</button>
+        </div>
     ))
 
     const parkingareas = displayParkingArea.map((val) => (
         <div key={val.id} parkingareaid={val.id} className="parkinglotitem">
             <p>Area name: {val.area}<br />
-            Type: {val.iscar ? "car":"motorbike"}<br />
-            Remaining Space: {val.remainingspace}<br />
+                Type: {val.iscar ? "car" : "motorbike"}<br />
+                Remaining Space: {val.remainingspace}<br />
             </p>
-            <img src={val.imagepath?`http://localhost:8000/${val.imagepath}`:undefined} alt="No img" className="parkinglotimage"/>
-            <button type="button" onClick={editParkingArea}>Edit</button>
+            <img src={val.imagepath ? `http://localhost:8000/${val.imagepath}` : undefined} alt="No img" className="parkinglotimage" />
+            <button type="button" onClick={EditParkingArea}>Edit</button>
         </div>
-))
+    ))
 
-    return(
+    return (
         <div>
             <AdminHeader />
             <div className="parkinglotdiv">
                 <div className="parkinglotsearch">
-                    <input type="text" name="searchParkinglot" placeholder="parkinglot search" onChange={handleChange} className="ParkinglotSearch"/>
+                    <input type="text" name="searchParkinglot" placeholder="parkinglot search" onChange={handleChange} className="ParkinglotSearch" />
                     <button name="Search" onClick={Search}>Search</button>
+                    <button onClick={createParkingLot}>Create Parking Lot</button>
                 </div>
                 <div className="parkinglotdisplay">
                     <div className="parkinglot">
@@ -124,40 +262,86 @@ const ParkingLotAdmin = () => {
                     </div>
                 </div>
             </div>
-            <div className="edit">
-                <h1>Parking Lot Edit</h1>
-                <div>
-                    <label for="name">Name: </label><input type="text" name="name" value={editParkingLot.name} onChange={onChangeEditParkingLot}/>
+            <div className="editbackground" id="editbackground">
+                <div className="edit" id="parkinglotform">
+                    <h1>{isCreate ? "New" : "Edit"} Parking Lot</h1>
+                    <div>
+                        <label htmlFor="name">Name: </label>
+                        <input type="text" name="name" value={parkingLotForm.name ? parkingLotForm.name : ""} onChange={onChangeParkingLotForm} />
+                    </div>
+                    <div>
+                        <label htmlFor="address">Address: </label>
+                        <input type="text" name="address" value={parkingLotForm.address ? parkingLotForm.address : ""} onChange={onChangeParkingLotForm} />
+                    </div>
+                    <div>
+                        <label htmlFor="dayfeemotorbike">Day Motorbike Fee: </label>
+                        <input type="text" name="dayfeemotorbike" value={parkingLotForm.dayfeemotorbike ? parkingLotForm.dayfeemotorbike : ""} onChange={onChangeParkingLotForm} />
+                    </div>
+                    <div>
+                        <label htmlFor="nightfeemotorbike">Night Motorbike Fee: </label>
+                        <input type="text" name="nightfeemotorbike" value={parkingLotForm.nightfeemotorbike ? parkingLotForm.nightfeemotorbike : ""} onChange={onChangeParkingLotForm} />
+                    </div>
+                    <div>
+                        <label htmlFor="carfee">Car Fee: </label>
+                        <input type="text" name="carfee" value={parkingLotForm.carfee ? parkingLotForm.carfee : ""} onChange={onChangeParkingLotForm} />
+                    </div>
+                    <p>Image:</p>
+                    <img src={formImage ? URL.createObjectURL(formImage) :
+                        (parkingLotForm.image_path ? `http://localhost:8000/${parkingLotForm.image_path}` : undefined)} alt="No img" className="parkinglotimage" />
+                    <br />
+                    <input
+                        type="file"
+                        name="img"
+                        id="parkingLotFormImage"
+                        // Event handler to capture file selection and update the state
+                        onChange={(event) => {
+                            setFormImage(event.target.files[0]); // Update the state with the selected file
+                        }}
+                    />
+                    <div>
+                        <button onClick={onCancelParkingLotForm}>Cancel</button>
+                        <button onClick={onSaveParkingLotForm}>Save</button>
+                    </div>
                 </div>
-                <div>
-                    <label for="address">Address: </label><input type="text" name="address" value={editParkingLot.address} onChange={onChangeEditParkingLot}/>
+                <div className="edit" id="parkingareaform">
+                    <h1>{isCreate ? "New" : "Edit"} Parking Area</h1>
+                    <div>
+                        <label htmlFor="area">Area: </label>
+                        <input type="text" name="area" value={parkingAreaForm.area ? parkingAreaForm.area : ""} onChange={onChangeParkingAreaForm} />
+                    </div>
+                    <div>
+                        <label htmlFor="maxspace">Maximum Space: </label>
+                        <input type="text" name="maxspace" value={parkingAreaForm.maxspace ? parkingAreaForm.maxspace : ""} onChange={onChangeParkingAreaForm} />
+                    </div>
+                    <div>
+                        <label htmlFor="remainingspace">Remaining Space: </label>
+                        <input type="text" name="remainingspace" value={parkingAreaForm.remainingspace ? parkingAreaForm.remainingspace : ""} onChange={onChangeParkingAreaForm} />
+                    </div>
+                    <div>
+                        <label htmlFor="iscar">Vehicle Type: </label>
+                        <select name="iscar" onChange={onChangeParkingAreaForm}>
+                            <option value={true} selected={parkingAreaForm.iscar ? "selected" : undefined}>Car</option>
+                            <option value={false} selected={parkingAreaForm.iscar ? undefined : "selected"}>Motorbike</option>
+                        </select>
+                    </div>
+                    <p>Image:</p>
+                    <img src={formImage ? URL.createObjectURL(formImage) :
+                        (parkingAreaForm.imagepath ? `http://localhost:8000/${parkingAreaForm.imagepath}` : undefined)} alt="No img" className="parkinglotimage" />
+                    <br />
+                    <input
+                        type="file"
+                        name="img"
+                        id="parkingAreaFormImage"
+                        // Event handler to capture file selection and update the state
+                        onChange={(event) => {
+                            setFormImage(event.target.files[0]); // Update the state with the selected file
+                        }}
+                    />
+                    <div>
+                        <button onClick={onCancelParkingAreaForm}>Cancel</button>
+                        <button onClick={onSaveParkingAreaForm}>Save</button>
+                    </div>
                 </div>
-                <div>
-                    <label for="dayfeemotorbike">Day Motorbike Fee: </label><input type="text" name="dayfeemotorbike" value={editParkingLot.dayfeemotorbike} onChange={onChangeEditParkingLot}/>
-                </div>
-                <div>
-                    <label for="nightfeemotorbike">Name: </label><input type="text" name="nightfeemotorbike" value={editParkingLot.nightfeemotorbike} onChange={onChangeEditParkingLot}/>
-                </div>
-                <div>
-                    <label for="carfee">Name: </label><input type="text" name="carfee" value={editParkingLot.carfee} onChange={onChangeEditParkingLot}/>
-                </div>
-                <img src={editParkingLotImage?URL.createObjectURL(editParkingLotImage):
-                    (val.imagepath?`http://localhost:8000/${val.imagepath}`:undefined)} alt="No img" className="parkinglotimage"/>
-                <input
-                    type="file"
-                    name="img"
-                    // Event handler to capture file selection and update the state
-                    onChange={(event) => {
-                        setEditParkingLotImage(event.target.files[0]); // Update the state with the selected file
-                    }}
-                />
-                <div>
-                    <button>Cancel</button>
-                    <button>Save</button>
-                </div>
-            </div>
-            <div className="edit">
-
             </div>
         </div>
     )

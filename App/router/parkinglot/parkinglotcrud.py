@@ -116,15 +116,15 @@ def update_parkinglot(parkinglotid:int, name:str, address:str, dayfeemotorbike: 
     try:
         with connectdb.session() as db:
             dbparkinglot = get_parkinglot_by_id(id=parkinglotid)
-            if(name & dbparkinglot.name != name):
+            if(dbparkinglot.name != name):
                 dbparkinglot.name = name
-            if(address & dbparkinglot.address != address):
+            if(dbparkinglot.address != address):
                 dbparkinglot.address = address
-            if(dayfeemotorbike & dbparkinglot.dayfeemotorbike != dayfeemotorbike):
+            if(dbparkinglot.dayfeemotorbike != dayfeemotorbike):
                 dbparkinglot.dayfeemotorbike = dayfeemotorbike
-            if(nightfeemotorbike & dbparkinglot.nightfeemotorbike != nightfeemotorbike):
+            if(dbparkinglot.nightfeemotorbike != nightfeemotorbike):
                 dbparkinglot.nightfeemotorbike = nightfeemotorbike
-            if(carfee & dbparkinglot.carfee != carfee):
+            if(dbparkinglot.carfee != carfee):
                 dbparkinglot.carfee = carfee
             if(img_path):
                 dbparkinglot.imagepath = img_path
@@ -135,11 +135,20 @@ def update_parkinglot(parkinglotid:int, name:str, address:str, dayfeemotorbike: 
     except Exception as e:
         raise e
     
-def update_parkingarea(img_path:str, parkingareaid:int):
+def update_parkingarea(img_path:str, parkingareaid:int, area:str, maxspace:int, remainingspace:int, iscar:bool):
     try:
         with connectdb.session() as db:
             dbparkingarea = get_parkingarea_by_id(id=parkingareaid)
-            dbparkingarea.imagepath = img_path
+            if(dbparkingarea.area != area):
+                dbparkingarea.area = area
+            if(dbparkingarea.maxspace != maxspace):
+                dbparkingarea.maxspace = maxspace
+            if(dbparkingarea.remainingspace != remainingspace):
+                dbparkingarea.remainingspace = remainingspace
+            if(dbparkingarea.iscar != iscar):
+                dbparkingarea.iscar = iscar
+            if(img_path):
+                dbparkingarea.imagepath = img_path
             db.add(dbparkingarea)
             db.commit()
             db.refresh(dbparkingarea)
@@ -162,10 +171,10 @@ def parking_exit(exit_image: models.Image, dbparkingdata:models.ParkingData):
         return dbparkingdata
 
 #CREATE
-def create_parkinglot(name:str, address:str, dayfeemotorbike: float, nightfeemotorbike: float, carfee: float):
+def create_parkinglot(name:str, address:str, dayfeemotorbike: float, nightfeemotorbike: float, carfee: float, img_path:str):
     try:
         with connectdb.session() as db:
-            newparkinglot = models.ParkingLot(name=name, address=address, dayfeemotorbike=dayfeemotorbike, nightfeemotorbike=nightfeemotorbike, carfee=carfee)
+            newparkinglot = models.ParkingLot(name=name, address=address, dayfeemotorbike=dayfeemotorbike, nightfeemotorbike=nightfeemotorbike, carfee=carfee, imagepath=img_path)
             db.add(newparkinglot)
             db.commit()
             db.refresh(newparkinglot)
@@ -174,10 +183,10 @@ def create_parkinglot(name:str, address:str, dayfeemotorbike: float, nightfeemot
     except Exception as e:
         raise e
     
-def create_parkingarea(area:str, maxspace:int, remainingspace:int, parkinglotid:int, iscar:bool):
+def create_parkingarea(area:str, maxspace:int, remainingspace:int, parkinglotid:int, iscar:bool, img_path:str):
     try:
         with connectdb.session() as db:
-            newparkingarea = models.ParkingArea(area=area, maxspace= maxspace, remainingspace= remainingspace, parkinglotid=parkinglotid, iscar=iscar)
+            newparkingarea = models.ParkingArea(area=area, maxspace= maxspace, remainingspace= remainingspace, parkinglotid=parkinglotid, iscar=iscar, imagepath=img_path)
             db.add(newparkingarea)
             db.commit()
             db.refresh(newparkingarea)

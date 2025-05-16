@@ -88,7 +88,11 @@ form div label{
   flex-direction: row;
   justify-content: space-between;
   padding: 1em;
-  width: 40em;
+  width: 45em;
+}
+
+.parkinglotitem button{
+  width: 5em;
 }
 
 .parkinglotitem:hover{
@@ -132,4 +136,26 @@ form div label{
   height: 1.5em;
   border-radius: 1em;
   padding-left: 0.5em;
+}
+
+.editbackground{
+  position: fixed;
+  display: none;
+  top: 0%;
+  left: 0%;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(5px);
+}
+
+.edit{
+  position: fixed;
+  display: none;
+  top: 50%;
+  left: 50%;
+  border: 2px solid black;
+  border-radius: 1em;
+  padding: 2em;
+  transform: translate(-50%, -50%);
+  background-color: white;
 }

@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getAuthHeader } from "../Util/AuthUtil"
 import AdminHeader from "../Components/AdminHeader";
-
-
+import Cookies from "js-cookie"
 
 const AdminPage = () => {
     const [input, setInputs] = useState("");
+    const [token, setToken] = useState(Cookies.get("Host-access_token") || "");
     const [fetchValue, setFetchValue] = useState("");
     const navigate = useNavigate()
 
@@ -49,7 +49,7 @@ const AdminPage = () => {
                     </div>
                 </div>
             </div>
-            <button onClick={navigate("/admin/parkinglot")}>ParkingLot</button>
+            <a href="/admin/parkinglot">Parking Lot</a>
         </div>
     )
 }

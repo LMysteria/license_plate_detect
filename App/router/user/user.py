@@ -21,13 +21,8 @@ def get_current_user(user: Annotated[data.User, userrouter.dependencies[0]]):
 def insert_money_to_balance(user: Annotated[data.User, userrouter.dependencies[0]], insertmoney: Annotated[float, Form()]):
     response = userutil.increasechange(username=user.username, change=insertmoney)
     return response
-    
-@userrouter.post("/balance/payment")
-def payment(user: Annotated[data.User, userrouter.dependencies[0]], payment: Annotated[float, Form()]):
-    response = userutil.decreasechange(username=user.username, change=payment)
-    return response
 
-@userrouter.post("/detail/update/phonenumber")
+@userrouter.post("/detail/update")
 def update_phonenumber(user: Annotated[data.User, userrouter.dependencies[0]], phonenumber: Annotated[str, Form()]):
     response = userutil.update_user_phonenumber(username=user.username, phonenumber=phonenumber)
     return response

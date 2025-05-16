@@ -13,11 +13,15 @@ adminapi.include_router(parkinglotrouter)
 
 adminapi.mount("/adminstatic",StaticFiles(directory="adminstatic"), name="adminstatic")
 
-@adminapi.get("/role/details", tags=["User"])
+@adminapi.get("/", tags=["user"])
+def get_current_admin(user: Annotated[data.User, Depends(authcontroller.check_adminpage_access)]):
+    return user
+
+@adminapi.get("/role/details", tags=["role"])
 def get_role_detail(roleid: int):
     return authcrud.get_role_by_id(id=roleid)
 
-@adminapi.post("/role/setrole", tags=["User"])
+@adminapi.post("/user/setrole", tags=["user"])
 def set_role(username:Annotated[str, Form()], rolename: Annotated[str, Form()]):
     """
     Set user's role level

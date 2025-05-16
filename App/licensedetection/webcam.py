@@ -7,6 +7,9 @@ import os
 import time
 import argparse
 import function.helper as helper
+import warnings
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # load model
 yolo_LP_detect = torch.hub.load('yolov5', 'custom', path='./App/licensedetection/model/LP_detector_nano_61.pt', force_reload=True, source='local')
@@ -18,6 +21,10 @@ new_frame_time = 0
 
 vid = cv2.VideoCapture(0)
 # vid = cv2.VideoCapture("1.mp4")
+
+pre_lp = ""
+
+
 while(True):
     ret, frame = vid.read()
     
@@ -45,6 +52,10 @@ while(True):
                     break
             if flag == 1:
                 break
+        if((lp not in pre_lp) & (lp != "unknown")):
+            pre_lp = lp
+            print(pre_lp)
+            
     new_frame_time = time.time()
     fps = 1/(new_frame_time-prev_frame_time)
     prev_frame_time = new_frame_time
