@@ -20,8 +20,12 @@ def parking_entry(img: UploadFile, parkingareaid:int, userid:int):
         detected = LP_recognition(img_path=relpath)
         dbimage = crud.create_image(relpath, type="detect")
         licensedb = crud.create_detectedlicense(license_number=detected[0], image_id=dbimage.id)
-        parkinglotcrud.areacheckin(parkingareaid=parkingareaid)
+        checkparkingdb = parkinglotcrud.get_last_parkingdata_by_licensenumber(licensenumber=licensedb.license_number, parkingareaid=parkingareaid)
+        if(checkparkingdb):
+            if(checkparkingdb.exit_time == None):
+                raise HTTPException(status_code=400, detail="data existed")
         parkingdb = parkinglotcrud.parking_entry(license_number=licensedb.license_number, entry_image_id=dbimage.id, parkingareaid=parkingareaid)
+        parkinglotcrud.areacheckin(parkingareaid=parkingareaid)
         dbuser = authcrud.get_user_by_userid(id=userid)
         usercrud.create_transaction(user=dbuser, balancechange=0, description="{} pay for their parking fee with license {} at the parkinglot has address {}".format(dbuser.id, licensedb.license_number, parkinglotcrud.get_parkingarea_by_id(parkingareaid).area), parkingdataid=parkingdb.id)
         return parkingdb
@@ -77,14 +81,14 @@ def parking_exit(img: UploadFile, parkingareaid:int, userid:int):
                 day = parkinghour//24
                 fee += (3*parkinglotdb.dayfeemotorbike+3*parkinglotdb.nightfeemotorbike)*day
                 if(dayentry):
-                    fee += feecalculator(parkinglotdb.dayfeemotorbike, (datetime.combine(entrytime.date(),time(hour=18))-entrytime))
+                    fee += feecalculator(parkinglotdb.dayfeemotorbike, (datetime.combine(entrytime.date(),time(hour=18))-entrytime).seconds//3600)
                 else:
-                    fee += feecalculator(parkinglotdb.nightfeemotorbike, ((datetime.combine(entrytime.date(),time(hour=6))+relativedelta(days=1))-entrytime))
+                    fee += feecalculator(parkinglotdb.nightfeemotorbike, ((datetime.combine(entrytime.date(),time(hour=6))+relativedelta(days=1))-entrytime).seconds//3600)
                     
                 if(dayexit):
-                    fee += feecalculator(parkinglotdb.dayfeemotorbike, (exittime-datetime.combine(exittime.date(),time(hour=6))))
+                    fee += feecalculator(parkinglotdb.dayfeemotorbike, (exittime-datetime.combine(exittime.date(),time(hour=6))).seconds//3600)
                 else:
-                    fee += feecalculator(parkinglotdb.nightfeemotorbike, (exittime-datetime.combine(exittime.date(),time(hour=18))))
+                    fee += feecalculator(parkinglotdb.nightfeemotorbike, (exittime-datetime.combine(exittime.date(),time(hour=18))).seconds//3600)
                 
         fee = round(fee,2)
         #fee payment
@@ -110,7 +114,6 @@ def parkinglotlist(search: str = "", skip: int = 0, limit: int = 10):
     
     for parkinglot in dbresponse:
         parkinglottuple = parkinglot.tuple()
-        print(parkinglottuple)
         parkinglotdata = parkinglottuple[0]
         
         dataParkingLot = data.ParkingLot(id=parkinglotdata.id,name=parkinglotdata.name, address=parkinglotdata.address, dayfeemotorbike=parkinglotdata.dayfeemotorbike, nightfeemotorbike=parkinglotdata.nightfeemotorbike, carfee=parkinglotdata.carfee, car_remaining_space=0, motorbike_remaining_space=0, image_path="")

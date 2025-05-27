@@ -105,8 +105,9 @@ def import_yolo_dataset(file: UploadFile, datasetname: str):
   
     return True
 
-def time_message(message:str, time:time):
-    print(message+": {}s".format(round(time, 4)))
+def time_message(message:str, starttime:time):
+    timedelta = time.time() - starttime
+    print(message+": {}s".format(round(timedelta, 4)))
     
 def image_autonaming(img: UploadFile, destination_directory:str, admin_perm:bool=False) -> str:
     staticprefix = "static"
@@ -120,4 +121,3 @@ def image_autonaming(img: UploadFile, destination_directory:str, admin_perm:bool
     
     relpath = os.path.join(staticprefix,destination_directory, img.filename)
     return relpath
-

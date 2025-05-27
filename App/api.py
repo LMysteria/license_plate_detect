@@ -19,6 +19,9 @@ from fastapi.staticfiles import StaticFiles
 # Initiate database
 models.Base.metadata.create_all(bind=connectdb.engine)
 
+#Preload detect model
+LP_recognition("crop.jpg")
+
 app = FastAPI(debug=True)
 
 app.mount("/admin", adminapi)
@@ -44,15 +47,17 @@ app.add_middleware(
 
 @app.post("/signup", tags=["Auth"], response_model=data.User)
 def signup(username: Annotated[str, Form()], password: Annotated[str, Form()]):
-    return authcontroller.signup_user(username=username, password=password)
+    starttime = time.time()
+    response = authcontroller.signup_user(username=username, password=password)
+    util.time_message("Create user with username {}".format(username),starttime=starttime)
+    return response
 
 @app.post("/login", tags=["Auth"])
 async def login(username: Annotated[str, Form()], password: Annotated[str, Form()]) -> data.Token:
-    return await authcontroller.authenticate_user(username=username, password=password)
-
-@app.get("/checkadmin", tags=["Auth"])
-async def checkadmin(user: Annotated[data.User, Depends(authcontroller.check_adminpage_access)]) -> data.User:
-    return user
+    starttime = time.time()
+    response = await authcontroller.authenticate_user(username=username, password=password)
+    util.time_message("Login user with username {}".format(username),starttime=starttime)
+    return response
 
 @app.post("/detect", tags=["License Detection AI"])
 def detect_license(img: UploadFile = File(...)):
@@ -69,13 +74,15 @@ def detect_license(img: UploadFile = File(...)):
     time_string = "{}s".format(round(execution_time, 4))
     response["license_number"] = detected
     response["execution_time"] = time_string
-    print(str(response))
     return JSONResponse(content=response)
 
 #CREATE
 @app.post("/create/dataset", tags=["Create"])
 def create_dataset(dataset_name: str):
-    return crud.create_dataset(dataset_name=dataset_name)
+    starttime = time.time()
+    response = crud.create_dataset(dataset_name=dataset_name)
+    util.time_message("Create dataset with name {}".format(dataset_name),starttime=starttime)
+    return 
 
 @app.post("/bulk/create/image", tags=["Create"])
 def bulk_create_image(type: str = "val", images: list[UploadFile] = File(...), dataset_id: Annotated[int, None] = None):
@@ -94,9 +101,7 @@ def bulk_create_image(type: str = "val", images: list[UploadFile] = File(...), d
         create_images.append({"path":relpath, "dataset_id":dataset_id, "type":type})
 
     response = crud.bulk_create_image(create_images)
-    execution_time = time.time() - start
-    time_string = "{}s".format(round(execution_time, 4))
-    print("bulk create images execution time: ",time_string)
+    util.time_message("bulk create images execution time", starttime=start)
     return response
 
 @app.post("/bulk/create/dataset/yolo", tags=["Create"])
@@ -114,9 +119,7 @@ def bulk_create_dataset_yolo(dataset_name: str, zipfile: UploadFile = File(...))
     """
     start = time.time()
     response = util.import_yolo_dataset(file=zipfile, datasetname=dataset_name)
-    execution_time = time.time() - start
-    time_string = "{}s".format(round(execution_time, 4))
-    print("Import yolo dataset execution time: ",time_string)
+    util.time_message("Import yolo dataset execution time", starttime=start)
     return response
     
 #GET

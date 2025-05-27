@@ -2,6 +2,8 @@ import { useState } from "react"
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import PageHeader from "../Components/PageHeader";
+import { getBackendContext } from "../Util/AuthUtil";
 
 const Signup = () => {
     const [input, setInputs] = useState("");
@@ -49,7 +51,7 @@ const Signup = () => {
         }
 
         const signupData = new FormData(event.target)
-        fetch("http://localhost:8000/signup",{
+        fetch(`${getBackendContext()}/signup`,{
             method: "POST",
             body: signupData
         })
@@ -60,7 +62,7 @@ const Signup = () => {
             throw response.json()
         })
         .then(()=>{
-            fetch("http://localhost:8000/login",{
+            fetch(`${getBackendContext()}/login`,{
                 method: "POST",
                 body: signupData
             })
@@ -83,43 +85,45 @@ const Signup = () => {
 
 
     return(
-    <div className="signUp">
-        <h1>Sign Up</h1>
-        <form onSubmit={handleSubmit} method="POST">
+    <PageHeader>
+        <div className="signUp">
+            <h1>Sign Up</h1>
+            <form onSubmit={handleSubmit} method="POST">
+                <div>
+                    <label>Username</label>
+                    <input 
+                    type="text" 
+                    name="username"
+                    value={input.username || ""}
+                    onChange={handleChange}
+                    />
+                </div>
+                <div>
+                <label>Password</label>
+                    <input 
+                    type="password" 
+                    name="password"
+                    value={input.password || ""}
+                    onChange={handleChange}
+                    />
+                </div>
+                <div>
+                    <label>Confirm Password</label>
+                    <input 
+                    type="password" 
+                    name="confirmpassword"
+                    value={input.confirmpassword || ""}
+                    onChange={handleChange}
+                    />
+                </div>
+                <button type="submit">Signup</button>
+            </form>
+            <span>{warning}</span>
             <div>
-                <label>Username</label>
-                <input 
-                type="text" 
-                name="username"
-                value={input.username || ""}
-                onChange={handleChange}
-                />
+            <span>Have an account? </span><Link to="/login">Login</Link>
             </div>
-            <div>
-            <label>Password</label>
-                <input 
-                type="password" 
-                name="password"
-                value={input.password || ""}
-                onChange={handleChange}
-                />
-            </div>
-            <div>
-                <label>Confirm Password</label>
-                <input 
-                type="password" 
-                name="confirmpassword"
-                value={input.confirmpassword || ""}
-                onChange={handleChange}
-                />
-            </div>
-            <button type="submit">Signup</button>
-        </form>
-        <span>{warning}</span>
-        <div>
-        <span>Have an account? </span><Link to="/login">Login</Link>
         </div>
-    </div>
+    </PageHeader>
     )
 }
 export default Signup

@@ -65,13 +65,11 @@ def get_parkinglot_list(searchpattern: str = "%%", skip: int=0, limit: int=10):
         raise e
     
 def get_last_parkingdata_by_licensenumber(licensenumber: str, parkingareaid:int):
-    start = time.time()
 
     with connectdb.session() as db:
         response = db.query(models.ParkingData).filter(models.ParkingData.license == licensenumber and 
                                                        models.ParkingData.parkingareaid==parkingareaid).order_by(models.ParkingData.id.desc()).first()
         
-        print("Get last parkingdata by licensenumber SQL Execution time: {}s".format(round(time.time()-start, 4)))
         return response
 
 #UPDATE
@@ -158,7 +156,6 @@ def update_parkingarea(img_path:str, parkingareaid:int, area:str, maxspace:int, 
     
 
 def parking_exit(exit_image: models.Image, dbparkingdata:models.ParkingData):
-    start = time.time()
 
     with connectdb.session() as db:
         dbparkingdata.eximage=exit_image
@@ -167,7 +164,6 @@ def parking_exit(exit_image: models.Image, dbparkingdata:models.ParkingData):
         db.commit()
         db.refresh(dbparkingdata)
         
-        print("Parking Data Update SQL Execution time: {}s".format(round(time.time()-start, 4)))
         return dbparkingdata
 
 #CREATE
@@ -196,7 +192,6 @@ def create_parkingarea(area:str, maxspace:int, remainingspace:int, parkinglotid:
         raise e
     
 def parking_entry(license_number:str, entry_image_id: int, parkingareaid:int):
-    start = time.time()
 
     with connectdb.session() as db:
         dbparkingdata = models.ParkingData(license=license_number, entry_img=entry_image_id, entry_time=now(), parkingareaid=parkingareaid)
@@ -204,7 +199,6 @@ def parking_entry(license_number:str, entry_image_id: int, parkingareaid:int):
         db.commit()
         db.refresh(dbparkingdata)
 
-        print("Create ParkingData SQL Execution time: {}s".format(round(time.time()-start, 4)))
         return dbparkingdata
     
 def create_manual_check(cid_img_path:str, cavet_img_path:str) -> models.ManualCheck:

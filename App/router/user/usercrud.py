@@ -4,26 +4,20 @@ from ...util import time_message
 import time
 
 def get_userdetails_by_userid(userid:int) -> models.UserDetail:
-    start = time.time()
     
     with connectdb.session() as db:
         response = db.query(models.UserDetail).filter(models.UserDetail.id == userid).first()
-    time_message("Get userdetails with id {} execution time".format(userid), time.time()-start)
     return response
 
 def get_transaction_by_userid_parkingid(userid:int, parkingdataid:int) -> models.TransactionDetail:
-    start = time.time()
     with connectdb.session() as db:
         response = db.query(models.TransactionDetail).filter(models.TransactionDetail.userid == userid and
                                                              models.TransactionDetail.parkingdataid == parkingdataid).first()
-    time_message("Get transaction with userid {} and parkingdataid {} execution time".format(userid, parkingdataid), time.time()-start)
     return response
 
 def get_transaction_by_parkingid(parkingdataid:int) -> models.TransactionDetail:
-    start = time.time()
     with connectdb.session() as db:
         response = db.query(models.TransactionDetail).filter(models.TransactionDetail.parkingdataid == parkingdataid).first()
-    time_message("Get transaction with parkingdataid {} execution time".format(parkingdataid), time.time()-start)
     return response
 
 #UPDATE
@@ -37,36 +31,30 @@ def update_userbalance(user:models.User, balancechange:float) -> models.UserDeta
     Returns:
         models.UserDetail: updated userdetail
     """
-    start = time.time()
     with connectdb.session() as db:
         dbuserdetail = get_userdetails_by_userid(userid=user.id)
         dbuserdetail.balance = round(dbuserdetail.balance + balancechange, 2)
         db.add(dbuserdetail)
         db.commit()
         db.refresh(dbuserdetail)
-        time_message("User {} balance remaining: {} . The change was: {}".format(user.username, dbuserdetail.balance, balancechange), time.time()-start)
     return dbuserdetail
 
 def update_transaction_change(parkingdataid:int, userid:int, change:float):
-    start = time.time()
     with connectdb.session() as db:
         dbtransaction = get_transaction_by_userid_parkingid(userid=userid, parkingdataid=parkingdataid)
         dbtransaction.balancechanges = round(change,2)
         db.add(dbtransaction)
         db.commit()
         db.refresh(dbtransaction)
-        time_message("Update Transaction \"change\" to {} with userid {} and parkingdataid {} ".format(round(change,2), userid, parkingdataid), time.time()-start)
     return dbtransaction
 
 def update_userphonenumber(user:models.User, phonenumber:str):
-    start = time.time()
     with connectdb.session() as db:
         dbuserdetail = get_userdetails_by_userid(userid=user.id)
         dbuserdetail.phonenumber = phonenumber
         db.add(dbuserdetail)
         db.commit()
         db.refresh(dbuserdetail)
-        time_message("User with username {} change phonenumber to {}".format(user.username, phonenumber), time.time()-start)
     return dbuserdetail
     
     

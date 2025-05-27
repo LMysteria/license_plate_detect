@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getBackendContext } from "../Util/AuthUtil";
 
 const ParkingLot = () => {
     const [parkinglotlist, setParkinglotlist] = useState([])
@@ -7,7 +8,7 @@ const ParkingLot = () => {
     const [input, setInputs] = useState("")
 
     const getParkinglotlist = (search="") => {
-        fetch(`http://localhost:8000/parkinglot/list?search=${search}`,{
+        fetch(`${getBackendContext()}/parkinglot/list?search=${search}`,{
             method: "GET",
         })
         .then((response) => response.json())
@@ -25,7 +26,7 @@ const ParkingLot = () => {
 
     useEffect(() => {
         if (clickedParkinglot>0){
-            fetch(`http://localhost:8000/parkinglot/${clickedParkinglot}/parkingarea/list`, {
+            fetch(`${getBackendContext()}/parkinglot/parkingarea/list?parkinglotid=${clickedParkinglot}`, {
                 method: "GET",
             })
             .then((response) => response.json())
@@ -50,7 +51,7 @@ const ParkingLot = () => {
                 Car Fee: {val.carfee}<br />
                 Car Remaining Space: {val.car_remaining_space}<br />
                 Motorbike Remaining Space: {val.motorbike_remaining_space}</p>
-                <img src={val.image_path? `http://localhost:8000/${val.image_path}`:undefined} alt="No img" className="parkinglotimage"/>
+                <img src={val.image_path? `${getBackendContext()}/${val.image_path}`:undefined} alt="No img" className="parkinglotimage"/>
             </div>
     ))
 
@@ -60,7 +61,7 @@ const ParkingLot = () => {
             Type: {val.iscar ? "car":"motorbike"}<br />
             Remaining Space: {val.remainingspace}<br />
             </p>
-            <img src={val.imagepath?`http://localhost:8000/${val.imagepath}`:undefined} alt="No img" className="parkinglotimage"/>
+            <img src={val.imagepath?`${getBackendContext()}/${val.imagepath}`:undefined} alt="No img" className="parkinglotimage"/>
         </div>
 ))
 

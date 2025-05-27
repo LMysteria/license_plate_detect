@@ -150,6 +150,7 @@ form div label{
 
 .edit{
   position: fixed;
+  flex-direction: column;
   display: none;
   top: 50%;
   left: 50%;
@@ -158,4 +159,45 @@ form div label{
   padding: 2em;
   transform: translate(-50%, -50%);
   background-color: white;
+  gap: 1em;
+}
+
+.edit div{
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+}
+
+.edit img{
+  align-self: center;
+}
+
+.edit input{
+  align-self: right;
+}
+
+.form{
+  display: flex;
+  flex-direction: column;
+  border: 2px solid black;
+  border-radius: 1em;
+  padding: 2em;
+  background-color: white;
+  width: fit-content;
+  margin: auto;
+  gap: 1em;
+}
+
+.form div{
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+}
+
+.form img{
+  align-self: center;
+}
+
+.form input{
+  align-self: right;
 }

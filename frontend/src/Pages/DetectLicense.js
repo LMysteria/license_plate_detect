@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { getBackendContext } from "../Util/AuthUtil";
 
 const DetectLicense = () => {
     // Define a functional component named UploadAndDisplayImage
@@ -13,7 +14,7 @@ const DetectLicense = () => {
     form.append("img",img)
     console.log(img.type)
     console.log(form)
-    fetch("http://localhost:8000/detect",{
+    fetch(`${getBackendContext()}/detect`,{
         method: "POST",
         body: form
     })

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { getAuthHeader } from "../Util/AuthUtil"
+import { useNavigate } from "react-router-dom";
+import { getAuthHeader, getBackendContext } from "../Util/AuthUtil"
 import Cookies from "js-cookie"
 
 const AdminHeader = () => {
@@ -14,7 +14,7 @@ const AdminHeader = () => {
         }
 
         if (username===""){
-            fetch("http://localhost:8000/admin/",{
+            fetch(`${getBackendContext()}/admin/`,{
                 method: "GET",
                 headers: getAuthHeader(token)
             })
@@ -43,7 +43,7 @@ const AdminHeader = () => {
     }
     return(
         <div className="header">
-            <span><Link to="/">Home</Link><span>, </span><Link to="/admin">Admin</Link></span>
+            <span><a href="/">Home</a><span>, </span><a href="/admin">Admin</a></span>
             <span className="userInfo">Welcome {username}, <button onClick={logout}>Logout</button></span>
         </div>
     )

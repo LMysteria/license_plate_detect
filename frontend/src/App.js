@@ -7,6 +7,8 @@ import UserPage from "./Pages/User";
 import "./App.css";
 import AdminPage from './Pages/Admin';
 import ParkingLotAdmin from './Pages/ParkingLotAdmin';
+import FeedBackPage from './Pages/FeedBack';
+import InsertMoneyPage from './Pages/InsertMoney';
 
 function App() {
   return(
@@ -17,6 +19,8 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/detectedlicense" element={<DetectLicense />} />
         <Route path="/userdetail" element={<UserPage />} />
+        <Route path="/feedback" element={<FeedBackPage />} />
+        <Route path="/insertmoney" element={<InsertMoneyPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path='/admin/parkinglot' element={<ParkingLotAdmin />} />
         <Route path="*" element={<Navigate to="/"/>} />

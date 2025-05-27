@@ -4,4 +4,8 @@ const getAuthHeader = (token) => {
     }))
 }
 
-export {getAuthHeader};
+const getBackendContext = () => {
+    return "http://localhost:8000"
+}
+
+export {getAuthHeader, getBackendContext};

@@ -1,6 +1,8 @@
 import { useState } from "react"
 import Cookies from "js-cookie";
 import { Link, useNavigate } from "react-router-dom";
+import PageHeader from "../Components/PageHeader";
+import { getBackendContext } from "../Util/AuthUtil";
 
 const Login = () => {
     const [input, setInputs] = useState("");
@@ -17,7 +19,7 @@ const Login = () => {
         event.preventDefault();
 
         const loginData = new FormData(event.target)
-        fetch("http://localhost:8000/login",{
+        fetch(`${getBackendContext()}/login`,{
             method: "POST",
             body: loginData
         })
@@ -39,34 +41,36 @@ const Login = () => {
 
 
     return(
-    <div className="Login">
-        <h1>Login</h1>
-        <form onSubmit={handleSubmit} method="POST">
+    <PageHeader>
+        <div className="Login">
+            <h1>Login</h1>
+            <form onSubmit={handleSubmit} method="POST">
+                <div>
+                    <label>Username</label>
+                    <input 
+                    type="text" 
+                    name="username"
+                    value={input.username || ""}
+                    onChange={handleChange}
+                    />
+                </div>
+                <div>
+                    <label>Password</label>
+                    <input 
+                    type="password" 
+                    name="password"
+                    value={input.password || ""}
+                    onChange={handleChange}
+                    />
+                </div>
+                <button type="submit" className="submit">Login</button>
+            </form>
+            <span>{warning}</span>
             <div>
-                <label>Username</label>
-                <input 
-                type="text" 
-                name="username"
-                value={input.username || ""}
-                onChange={handleChange}
-                />
+                <span>Don't have an account? </span><Link to="/signup">Create account</Link>
             </div>
-            <div>
-                <label>Password</label>
-                <input 
-                type="password" 
-                name="password"
-                value={input.password || ""}
-                onChange={handleChange}
-                />
-            </div>
-            <button type="submit" className="submit">Login</button>
-        </form>
-        <span>{warning}</span>
-        <div>
-            <span>Don't have an account? </span><Link to="/signup">Create account</Link>
         </div>
-    </div>
+    </PageHeader>
     )
 }
 export default Login

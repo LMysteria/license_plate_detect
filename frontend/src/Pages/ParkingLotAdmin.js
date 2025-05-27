@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminHeader from "../Components/AdminHeader";
 import Cookies from "js-cookie"
-import { getAuthHeader } from "../Util/AuthUtil";
+import { getAuthHeader, getBackendContext } from "../Util/AuthUtil";
 
 const ParkingLotAdmin = () => {
     const [token] = useState(Cookies.get("Host-access_token") || "");
@@ -15,7 +15,7 @@ const ParkingLotAdmin = () => {
     const [input, setInputs] = useState("")
 
     const getParkinglotlist = (search = "") => {
-        fetch(`http://localhost:8000/parkinglot/list?search=${search}`, {
+        fetch(`${getBackendContext()}/parkinglot/list?search=${search}`, {
             method: "GET",
         })
             .then((response) => response.json())
@@ -33,7 +33,7 @@ const ParkingLotAdmin = () => {
 
     useEffect(() => {
         if (clickedParkinglot > 0) {
-            fetch(`http://localhost:8000/parkinglot/${clickedParkinglot}/parkingarea/list`, {
+            fetch(`${getBackendContext()}/parkinglot/parkingarea/list?parkinglotid=${clickedParkinglot}`, {
                 method: "GET",
             })
                 .then((response) => response.json())
@@ -76,7 +76,7 @@ const ParkingLotAdmin = () => {
             const headers = getAuthHeader(token)
             console.log(Object.fromEntries(form.entries()))
             if(isCreate){
-                fetch(`http://localhost:8000/admin/parkinglot/create`, {
+                fetch(`${getBackendContext()}/admin/parkinglot/create`, {
                     method: "POST",
                     body: form,
                     headers: headers
@@ -89,7 +89,8 @@ const ParkingLotAdmin = () => {
                 })
             }
             else{
-                fetch(`http://localhost:8000/admin/parkinglot/${parkingLotForm.id}/update`, {
+                form.append("parkinglotid", parkingLotForm.id)
+                fetch(`${getBackendContext()}/admin/parkinglot/update`, {
                     method: "POST",
                     body: form,
                     headers: headers
@@ -114,7 +115,7 @@ const ParkingLotAdmin = () => {
             form.append("area", parkingAreaForm.area)
             form.append("maxspace", parkingAreaForm.maxspace)
             form.append("remainingspace", parkingAreaForm.remainingspace)
-            if(parkingAreaForm.iscar == undefined){
+            if(parkingAreaForm.iscar === undefined){
                 form.append("iscar", false)}
             else{
             form.append("iscar", parkingAreaForm.iscar)}
@@ -125,7 +126,7 @@ const ParkingLotAdmin = () => {
             console.log(Object.fromEntries(form.entries()))
             if(isCreate){
                 form.append("parkinglotid",parkingLotForm.id)
-                fetch(`http://localhost:8000/admin/parkinglot/parkingarea/create`, {
+                fetch(`${getBackendContext()}/admin/parkinglot/parkingarea/create`, {
                     method: "POST",
                     body: form,
                     headers: headers
@@ -137,7 +138,8 @@ const ParkingLotAdmin = () => {
                         }
                 })
             }else{
-                fetch(`http://localhost:8000/admin/parkinglot/parkingarea/${parkingAreaForm.id}/update`, {
+                form.append("parkingareaid",parkingAreaForm.id)
+                fetch(`${getBackendContext()}/admin/parkinglot/parkingarea/update`, {
                     method: "POST",
                     body: form,
                     headers: headers
@@ -188,7 +190,7 @@ const ParkingLotAdmin = () => {
         const parkinglot = parkinglotlist.find((val) => val.id === parkinglotid);
         setIsCreate(false)
         setParkingLotForm(parkinglot)
-        document.getElementById("parkinglotform").style.display="block"
+        document.getElementById("parkinglotform").style.display="flex"
         document.getElementById("editbackground").style.display="block"
         console.log(parkinglot)
     }
@@ -198,14 +200,14 @@ const ParkingLotAdmin = () => {
         const parkingarea = displayParkingArea.find((val) => val.id === parkingareaid);
         setIsCreate(false)
         setParkingAreaForm(parkingarea)
-        document.getElementById("parkingareaform").style.display="block"
+        document.getElementById("parkingareaform").style.display="flex"
         document.getElementById("editbackground").style.display="block"
         console.log(parkingarea)
     }
 
     const createParkingLot = () => {
         setIsCreate(true)
-        document.getElementById("parkinglotform").style.display="block"
+        document.getElementById("parkinglotform").style.display="flex"
         document.getElementById("editbackground").style.display="block"
     }
 
@@ -214,7 +216,7 @@ const ParkingLotAdmin = () => {
         const parkinglot = parkinglotlist.find((val) => val.id === parkinglotid);
         setParkingLotForm(parkinglot)
         setIsCreate(true)
-        document.getElementById("parkingareaform").style.display="block"
+        document.getElementById("parkingareaform").style.display="flex"
         document.getElementById("editbackground").style.display="block"
     }
 
@@ -227,7 +229,7 @@ const ParkingLotAdmin = () => {
                 Car Fee: {val.carfee}<br />
                 Car Remaining Space: {val.car_remaining_space}<br />
                 Motorbike Remaining Space: {val.motorbike_remaining_space}</p>
-            <img src={val.image_path ? `http://localhost:8000/${val.image_path}` : undefined} alt="No img" className="parkinglotimage" />
+            <img src={val.image_path ? `${getBackendContext()}/${val.image_path}` : undefined} alt="No img" className="parkinglotimage" />
             <button type="button" onClick={EditParkingLot}>Edit</button>
             <button type="button" onClick={createParkingArea}>Create Parking Area</button>
         </div>
@@ -239,7 +241,7 @@ const ParkingLotAdmin = () => {
                 Type: {val.iscar ? "car" : "motorbike"}<br />
                 Remaining Space: {val.remainingspace}<br />
             </p>
-            <img src={val.imagepath ? `http://localhost:8000/${val.imagepath}` : undefined} alt="No img" className="parkinglotimage" />
+            <img src={val.imagepath ? `${getBackendContext()}/${val.imagepath}` : undefined} alt="No img" className="parkinglotimage" />
             <button type="button" onClick={EditParkingArea}>Edit</button>
         </div>
     ))
@@ -285,10 +287,9 @@ const ParkingLotAdmin = () => {
                         <label htmlFor="carfee">Car Fee: </label>
                         <input type="text" name="carfee" value={parkingLotForm.carfee ? parkingLotForm.carfee : ""} onChange={onChangeParkingLotForm} />
                     </div>
-                    <p>Image:</p>
+                    <span>Image:</span>
                     <img src={formImage ? URL.createObjectURL(formImage) :
-                        (parkingLotForm.image_path ? `http://localhost:8000/${parkingLotForm.image_path}` : undefined)} alt="No img" className="parkinglotimage" />
-                    <br />
+                        (parkingLotForm.image_path ? `${getBackendContext()}/${parkingLotForm.image_path}` : undefined)} alt="No img" className="parkinglotimage" />
                     <input
                         type="file"
                         name="img"
@@ -324,10 +325,9 @@ const ParkingLotAdmin = () => {
                             <option value={false} selected={parkingAreaForm.iscar ? undefined : "selected"}>Motorbike</option>
                         </select>
                     </div>
-                    <p>Image:</p>
+                    <span>Image:</span>
                     <img src={formImage ? URL.createObjectURL(formImage) :
-                        (parkingAreaForm.imagepath ? `http://localhost:8000/${parkingAreaForm.imagepath}` : undefined)} alt="No img" className="parkinglotimage" />
-                    <br />
+                        (parkingAreaForm.imagepath ? `${getBackendContext()}/${parkingAreaForm.imagepath}` : undefined)} alt="No img" className="parkinglotimage" />
                     <input
                         type="file"
                         name="img"
