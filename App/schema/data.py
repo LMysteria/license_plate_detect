@@ -16,6 +16,7 @@ class User(BaseModel):
     
 class UserDetail(BaseModel):
     id: int
+    username:str
     phonenumber: str
     balance: float
     role: str

@@ -1,8 +1,8 @@
-import PageHeader from "../Components/PageHeader"
+import PageHeader from "../../Components/PageHeader"
 import { useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
-import { userContext } from "../Components/PageHeader";
-import { getBackendContext, getAuthHeader } from "../Util/AuthUtil";
+import { userContext } from "../../Components/PageHeader";
+import { getBackendContext, getAuthHeader } from "../../Util/AuthUtil";
 import Cookies from "js-cookie"
 
 const FeedBackPage = () => {

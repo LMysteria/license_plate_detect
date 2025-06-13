@@ -1,5 +1,5 @@
-import UserDetail from "../Components/UserDetail"
-import PageHeader from "../Components/PageHeader"
+import UserDetail from "../../Components/UserDetail"
+import PageHeader from "../../Components/PageHeader"
 
 const UserPage = () => {
     return(

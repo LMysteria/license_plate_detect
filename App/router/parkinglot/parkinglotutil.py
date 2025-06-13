@@ -12,14 +12,13 @@ from dateutil.relativedelta import relativedelta
 from ...schema import data
 from sqlalchemy import null
 
-def parking_entry(img: UploadFile, parkingareaid:int, userid:int):
+def parking_entry(img: UploadFile, parkingareaid:int, userid:int, detected:str):
     try:
         relpath = util.image_autonaming(img=img, destination_directory="parkingdataimage", admin_perm=True)
         fullpath = os.path.join(os.getcwd(),relpath)
         util.save_upload_file(img, Path(fullpath))
-        detected = LP_recognition(img_path=relpath)
         dbimage = crud.create_image(relpath, type="detect")
-        licensedb = crud.create_detectedlicense(license_number=detected[0], image_id=dbimage.id)
+        licensedb = crud.create_detectedlicense(license_number=detected, image_id=dbimage.id)
         checkparkingdb = parkinglotcrud.get_last_parkingdata_by_licensenumber(licensenumber=licensedb.license_number, parkingareaid=parkingareaid)
         if(checkparkingdb):
             if(checkparkingdb.exit_time == None):
@@ -27,24 +26,23 @@ def parking_entry(img: UploadFile, parkingareaid:int, userid:int):
         parkingdb = parkinglotcrud.parking_entry(license_number=licensedb.license_number, entry_image_id=dbimage.id, parkingareaid=parkingareaid)
         parkinglotcrud.areacheckin(parkingareaid=parkingareaid)
         dbuser = authcrud.get_user_by_userid(id=userid)
-        usercrud.create_transaction(user=dbuser, balancechange=0, description="{} pay for their parking fee with license {} at the parkinglot has address {}".format(dbuser.id, licensedb.license_number, parkinglotcrud.get_parkingarea_by_id(parkingareaid).area), parkingdataid=parkingdb.id)
+        usercrud.create_transaction(user=dbuser, balancechange=0, description="{} pay for their parking fee with license {} at the parkinglot has address {}".format(dbuser.username, licensedb.license_number, parkinglotcrud.get_parkingarea_by_id(parkingareaid).area), parkingdataid=parkingdb.id)
         return parkingdb
     except Exception as e:
         raise e
 
-def parking_exit(img: UploadFile, parkingareaid:int, userid:int):
+def parking_exit(img: UploadFile, parkingareaid:int, userid:int, detected:str):
     try:
         parkingareadb = parkinglotcrud.get_parkingarea_by_id(parkingareaid)
         relpath = util.image_autonaming(img=img, destination_directory="parkingdataimage", admin_perm=True)
         fullpath = os.path.join(os.getcwd(),relpath)
         util.save_upload_file(img, Path(fullpath))
-        detected = LP_recognition(img_path=relpath)
         dbimage = crud.create_image(relpath, type="detect")
-        licensedb = crud.create_detectedlicense(license_number=detected[0], image_id=dbimage.id)
+        licensedb = crud.create_detectedlicense(license_number=detected, image_id=dbimage.id)
         entryparkingdb = parkinglotcrud.get_last_parkingdata_by_licensenumber(licensenumber=licensedb.license_number, parkingareaid=parkingareaid)
         
         parkingdb = entryparkingdb
-        if not entryparkingdb.manualcheckid:
+        if (not entryparkingdb.manualcheckid):
             transactiondb = usercrud.get_transaction_by_userid_parkingid(userid=userid, parkingdataid=entryparkingdb.id)
             if(not transactiondb):
                 raise HTTPException(status_code=400, detail="parkingdata with userid {} not found".format(userid))

@@ -36,4 +36,4 @@ def get_user_detail(user: data.User):
     if(dbUserDetail.phonenumber):
         phonenumber=dbUserDetail.phonenumber
     dbRole = authcrud.get_role_by_id(id=dbUserDetail.roleid)
-    return data.UserDetail(id=dbUserDetail.id, phonenumber=phonenumber, balance=dbUserDetail.balance, role=dbRole.name)
+    return data.UserDetail(id=dbUserDetail.id, phonenumber=phonenumber, balance=dbUserDetail.balance, role=dbRole.name, username=user.username)

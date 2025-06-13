@@ -6,6 +6,8 @@ from ..schema import data
 from ..auth import authcontroller, authcrud
 from ..router.parkinglot.parkinglot import parkinglotrouter
 from fastapi.staticfiles import StaticFiles
+from ..util import time_message
+import time
 
 adminapi = FastAPI(servers=[{"url": "/admin"},{"url":""}], dependencies=[Depends(authcontroller.check_adminpage_access)])
 adminapi.include_router(parkinglotrouter)
@@ -19,7 +21,10 @@ def get_current_admin(user: Annotated[data.User, Depends(authcontroller.check_ad
 
 @adminapi.get("/role/details", tags=["role"])
 def get_role_detail(roleid: int):
-    return authcrud.get_role_by_id(id=roleid)
+    start = time.time()
+    response = authcrud.get_role_by_id(id=roleid)
+    time_message(f"get role with id {roleid} detail",start)
+    return response
 
 @adminapi.post("/user/setrole", tags=["user"])
 def set_role(username:Annotated[str, Form()], rolename: Annotated[str, Form()]):
@@ -35,8 +40,9 @@ def set_role(username:Annotated[str, Form()], rolename: Annotated[str, Form()]):
         or an error message if set role fails.
     """
     try:
+        start = time.time()
         result = adminutil.update_user_role(username=username, rolename=rolename)
-
+        time_message(f"user {username} role set to {rolename}",start)
         return JSONResponse(content=result, status_code=200)
     
     except Exception as e:

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import AdminHeader from "../Components/AdminHeader";
+import AdminHeader from "../../Components/AdminHeader";
 import Cookies from "js-cookie"
-import { getAuthHeader, getBackendContext } from "../Util/AuthUtil";
+import { getAuthHeader, getBackendContext } from "../../Util/AuthUtil";
 
 const ParkingLotAdmin = () => {
     const [token] = useState(Cookies.get("Host-access_token") || "");

@@ -10,21 +10,10 @@ const userContext = createContext({});
 const PageHeader = (outline) => {
 
     const [token, setToken] = useState(Cookies.get("Host-access_token") || "");
-    const [username, setUsername] = useState("");
     const [detail, setDetail] = useState({});
     const navigate = useNavigate();
     useEffect(() => {
-        if (username==="" & token !== ""){
-            fetch(`${getBackendContext()}/user/account`,{
-                method: "GET",
-                headers: getAuthHeader(token)
-            })
-            .then((response)=>response.json())
-            .then((data)=>{
-                setUsername(data["username"])
-            })
-            .catch((err)=>console.log(err))
-    
+        if (token !== ""){
             fetch(`${getBackendContext()}/user/detail`,{
                 method: "GET",
                 headers: getAuthHeader(token)
@@ -35,18 +24,18 @@ const PageHeader = (outline) => {
             })
             .catch((err)=>console.log(err))
         }
-    },[username, token, navigate])
+    },[token, navigate])
 
     const logout = () => {
         Cookies.remove("Host-access_token",{path:"/"});
         setToken("");
     }
-
+    console.log(detail)
     return(
         <div>
             <div className="header">
                 <span><a href="/">Home</a></span>
-                {JSON.stringify(detail) !== '{}'?<span className="userInfo">Welcome <a href="/userdetail">{username}</a>, Balance: {detail.balance}, <button onClick={logout}>Logout</button></span>:
+                {JSON.stringify(detail) !== '{}'?<span className="userInfo">Welcome <a href="/userdetail">{detail.username}</a>, Balance: {detail.balance}, <button onClick={logout}>Logout</button></span>:
                 <span className="userInfo"><a href="/login">Login</a>,   <a href="/signup">Create account</a></span>
                 }
                 

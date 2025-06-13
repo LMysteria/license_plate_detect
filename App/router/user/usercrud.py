@@ -11,13 +11,18 @@ def get_userdetails_by_userid(userid:int) -> models.UserDetail:
 
 def get_transaction_by_userid_parkingid(userid:int, parkingdataid:int) -> models.TransactionDetail:
     with connectdb.session() as db:
-        response = db.query(models.TransactionDetail).filter(models.TransactionDetail.userid == userid and
+        response = db.query(models.TransactionDetail).filter(models.TransactionDetail.userid == userid,
                                                              models.TransactionDetail.parkingdataid == parkingdataid).first()
     return response
 
 def get_transaction_by_parkingid(parkingdataid:int) -> models.TransactionDetail:
     with connectdb.session() as db:
         response = db.query(models.TransactionDetail).filter(models.TransactionDetail.parkingdataid == parkingdataid).first()
+    return response
+
+def get_transaction_by_userid(userid:int) -> models.TransactionDetail:
+    with connectdb.session() as db:
+        response = db.query(models.TransactionDetail).filter(models.TransactionDetail.userid == userid).all()
     return response
 
 #UPDATE
@@ -40,13 +45,17 @@ def update_userbalance(user:models.User, balancechange:float) -> models.UserDeta
     return dbuserdetail
 
 def update_transaction_change(parkingdataid:int, userid:int, change:float):
-    with connectdb.session() as db:
-        dbtransaction = get_transaction_by_userid_parkingid(userid=userid, parkingdataid=parkingdataid)
-        dbtransaction.balancechanges = round(change,2)
-        db.add(dbtransaction)
-        db.commit()
-        db.refresh(dbtransaction)
-    return dbtransaction
+    try:
+        with connectdb.session() as db:
+            dbtransaction = get_transaction_by_userid_parkingid(userid=userid, parkingdataid=parkingdataid)
+            dbtransaction.balancechanges = round(change,2)
+            print(dbtransaction.balancechanges)
+            db.add(dbtransaction)
+            db.commit()
+            db.refresh(dbtransaction)
+        return dbtransaction
+    except Exception:
+        raise Exception
 
 def update_userphonenumber(user:models.User, phonenumber:str):
     with connectdb.session() as db:

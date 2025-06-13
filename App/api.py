@@ -19,9 +19,6 @@ from fastapi.staticfiles import StaticFiles
 # Initiate database
 models.Base.metadata.create_all(bind=connectdb.engine)
 
-#Preload detect model
-LP_recognition("crop.jpg")
-
 app = FastAPI(debug=True)
 
 app.mount("/admin", adminapi)

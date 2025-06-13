@@ -35,7 +35,9 @@ def webcam():
 
     vid = cv2.VideoCapture(0)
     # vid = cv2.VideoCapture("1.mp4")
-
+    
+    vid.set(cv2.CAP_PROP_AUTO_EXPOSURE, 1)
+        
     pre_lp = ""
     start: time = time.time()
     isSend: bool = False
@@ -77,7 +79,8 @@ def webcam():
                 isSend = True
                 print("Send detected license {}".format(pre_lp))
                 cv2.imwrite("temp.jpg",frame)
-                form = {"parkingareaid":parkingareaid, "userid":userid}
+                start = time.time()
+                form = {"parkingareaid":parkingareaid, "userid":userid, "license":lp}
                 images = {'img': open('temp.jpg','rb')}
                 print(form)
                 if(isCheckIn):
@@ -90,7 +93,7 @@ def webcam():
                 else:
                     print("Record Failed")
                     print(response.json())
-                
+                print("Receive response in: {}s".format(time.time()-start))
         new_frame_time = time.time()
         fps = 1/(new_frame_time-prev_frame_time)
         prev_frame_time = new_frame_time

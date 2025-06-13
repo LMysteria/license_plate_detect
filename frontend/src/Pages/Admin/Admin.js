@@ -1,4 +1,4 @@
-import AdminHeader from "../Components/AdminHeader";
+import AdminHeader from "../../Components/AdminHeader";
 
 const AdminPage = () => {
 
