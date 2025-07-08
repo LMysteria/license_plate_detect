@@ -32,7 +32,7 @@ const PageHeader = (outline) => {
     }
     console.log(detail)
     return(
-        <div>
+        <div className="content">
             <div className="header">
                 <span><a href="/">Home</a></span>
                 {JSON.stringify(detail) !== '{}'?<span className="userInfo">Welcome <a href="/userdetail">{detail.username}</a>, Balance: {detail.balance}, <button onClick={logout}>Logout</button></span>:
@@ -40,9 +40,11 @@ const PageHeader = (outline) => {
                 }
                 
             </div>
-            <userContext.Provider value={detail}>
-                    {outline.children}
-            </userContext.Provider>
+            <div className="home-content">
+                <userContext.Provider value={detail} >
+                        {outline.children}
+                </userContext.Provider>
+            </div>
         </div>
     )
 }

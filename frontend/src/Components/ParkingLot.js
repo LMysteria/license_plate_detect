@@ -46,12 +46,8 @@ const ParkingLot = () => {
             <div key={val.id} parkinglotid={val.id} className="parkinglotitem" onClick={onClickParkingLot}>
                 <p>Name: {val.name}<br />
                 Address: {val.address}<br />
-                Day Motorbike Fee: {val.dayfeemotorbike}<br />
-                Night Motorbike Fee: {val.nightfeemotorbike}<br />
-                Car Fee: {val.carfee}<br />
                 Car Remaining Space: {val.car_remaining_space}<br />
                 Motorbike Remaining Space: {val.motorbike_remaining_space}</p>
-                <img src={val.image_path? `${getBackendContext()}/${val.image_path}`:undefined} alt="No img" className="parkinglotimage"/>
             </div>
     ))
 
@@ -76,7 +72,7 @@ const ParkingLot = () => {
     }
 
     return(
-        <div className="parkinglotdiv">
+        <div>
             <div className="parkinglotsearch">
                 <input type="text" name="searchParkinglot" placeholder="parkinglot search" onChange={handleChange} className="ParkinglotSearch"/>
                 <button name="Search" onClick={Search}>Search</button>

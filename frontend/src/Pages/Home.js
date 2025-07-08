@@ -1,11 +1,11 @@
+import CustomGoogleMap from "../Components/GoogleMap";
 import PageHeader from "../Components/PageHeader";
-import ParkingLot from "../Components/ParkingLot";
 
 
 const Home = () => {
     return(
         <PageHeader>
-                <ParkingLot />
+                <CustomGoogleMap />
         </PageHeader>
     )
 }
