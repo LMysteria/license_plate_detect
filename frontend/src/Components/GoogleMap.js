@@ -1,8 +1,8 @@
-import {APIProvider, Map, Marker} from '@vis.gl/react-google-maps';
+import {Map, Marker} from '@vis.gl/react-google-maps';
 import { useRef, useState, useEffect } from 'react';
-import ParkingLot from './ParkingLot';
 import {fromAddress} from 'react-geocode'
 import { getBackendContext } from "../Util/AuthUtil";
+import DirectionDisplay from './DirectionDisplay';
 
 const CustomGoogleMap = () => {
     const mapRef = useRef(null);
@@ -75,7 +75,7 @@ const CustomGoogleMap = () => {
         const map = mapRef.current.map;
         const clicked = parseInt(event.target.getAttribute("parkinglotid"))
         setClickedParkinglot(clicked)
-        const result = parkinglotlist.filter((parkinglot) => {return parkinglot.id===clickedParkinglot})[0]
+        const result = parkinglotlist.filter((parkinglot) => {return parkinglot.id===clicked})[0]
         console.log(result)
         const pos = {lat: result.lat, lng: result.lng}
         map.setCenter(pos)
@@ -103,41 +103,40 @@ const CustomGoogleMap = () => {
 
     return (
         <div>
-            <APIProvider apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY} onLoad={() => console.log('Maps API has loaded.')}>
-                <div className='googlemap'>
-                    <Map 
-                        id='map'
-                        disableDefaultUI={true}
-                        defaultZoom={13}
-                        defaultCenter={ center }
-                        onCameraChanged={(ev) => console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)}
-                        onTilesLoaded={(map) => {mapRef.current = map; console.log("Ref loaded", mapRef.current)}}
-                    >
-                        <Marker position={currentMarker}/>
-                        <Marker position={parkinglotMarker}/>
-                    </Map>
+            <div className='googlemap'>
+                <Map 
+                    id='map'
+                    disableDefaultUI={true}
+                    defaultZoom={13}
+                    defaultCenter={ center }
+                    onCameraChanged={(ev) => console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)}
+                    onTilesLoaded={(map) => {mapRef.current = map; console.log("Ref loaded", mapRef.current)}}
+                >
+                    <Marker position={currentMarker}/>
+                    <Marker position={parkinglotMarker}/>
+                    <DirectionDisplay origin={currentMarker} destination={parkinglotMarker}/>
+                </Map>
+            </div>
+            <div className="parkinglotdiv">
+                <div>
+                    <input type="text" name="currentposition" placeholder="current position" className="ParkinglotSearch" onChange={handleChange}/>
+                    <button onClick={PositionSearch}>Search</button>
                 </div>
-                <div className="parkinglotdiv">
-                    <div>
-                        <input type="text" name="currentposition" placeholder="current position" className="ParkinglotSearch" onChange={handleChange}/>
-                        <button onClick={PositionSearch}>Search</button>
+                <div>
+                    <div className="parkinglotsearch">
+                        <input type="text" name="searchParkinglot" placeholder="parkinglot search" onChange={handleChange} className="ParkinglotSearch"/>
+                        <button name="Search" onClick={Search}>Search</button>
                     </div>
-                    <div>
-                        <div className="parkinglotsearch">
-                            <input type="text" name="searchParkinglot" placeholder="parkinglot search" onChange={handleChange} className="ParkinglotSearch"/>
-                            <button name="Search" onClick={Search}>Search</button>
+                    <div className="parkinglotdisplay">
+                        <div className="parkinglot">
+                            {parkinglots}
                         </div>
-                        <div className="parkinglotdisplay">
-                            <div className="parkinglot">
-                                {parkinglots}
-                            </div>
-                            <div className="parkinglot">
-                                {parkingareas}
-                            </div>
+                        <div className="parkinglot">
+                            {parkingareas}
                         </div>
                     </div>
                 </div>
-            </APIProvider>
+            </div>
         </div>
     );
 }

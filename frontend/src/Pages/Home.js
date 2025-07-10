@@ -1,11 +1,11 @@
-import CustomGoogleMap from "../Components/GoogleMap";
 import PageHeader from "../Components/PageHeader";
+import GooglemapAPIProvider from "../Components/GoogleMapAPIProvider";
 
 
 const Home = () => {
     return(
         <PageHeader>
-                <CustomGoogleMap />
+                <GooglemapAPIProvider/>
         </PageHeader>
     )
 }
