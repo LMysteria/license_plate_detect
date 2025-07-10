@@ -30,6 +30,8 @@ class ParkingLot(BaseModel):
     id: int
     name: str
     address: str
+    lat: float
+    lng: float
     dayfeemotorbike: float
     nightfeemotorbike: float
     carfee: float

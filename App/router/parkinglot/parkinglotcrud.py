@@ -55,7 +55,7 @@ def get_parkinglot_list(searchpattern: str = "%%", skip: int=0, limit: int=10):
             dbparkinglist = db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
                             ).outerjoin(car_remaing_space, car_remaing_space.c.parkinglotid == models.ParkingLot.id
                             ).outerjoin(motorbike_remaing_space, motorbike_remaing_space.c.parkinglotid == models.ParkingLot.id
-                            ).filter(models.ParkingLot.name.like(searchpattern)
+                            ).filter(models.ParkingLot.name.like(searchpattern)|models.ParkingLot.address.like(searchpattern)
                             ).offset(offset=skip
                             ).limit(limit=limit
                             ).all()
@@ -110,7 +110,7 @@ def update_parkingdata_manualcheck(parkingdataid:int, manualcheckid:int):
     except Exception as e:
         raise e
         
-def update_parkinglot(parkinglotid:int, name:str, address:str, dayfeemotorbike: float, nightfeemotorbike: float, carfee: float, img_path:str):
+def update_parkinglot(parkinglotid:int, name:str, address:str, lat:float, lng:float, dayfeemotorbike: float, nightfeemotorbike: float, carfee: float, img_path:str):
     try:
         with connectdb.session() as db:
             dbparkinglot = get_parkinglot_by_id(id=parkinglotid)
@@ -118,6 +118,10 @@ def update_parkinglot(parkinglotid:int, name:str, address:str, dayfeemotorbike: 
                 dbparkinglot.name = name
             if(dbparkinglot.address != address):
                 dbparkinglot.address = address
+            if(dbparkinglot.lat != lat):
+                dbparkinglot.lat = lat
+            if(dbparkinglot.lng != lng):
+                dbparkinglot.lng = lng
             if(dbparkinglot.dayfeemotorbike != dayfeemotorbike):
                 dbparkinglot.dayfeemotorbike = dayfeemotorbike
             if(dbparkinglot.nightfeemotorbike != nightfeemotorbike):
@@ -167,10 +171,11 @@ def parking_exit(exit_image: models.Image, dbparkingdata:models.ParkingData):
         return dbparkingdata
 
 #CREATE
-def create_parkinglot(name:str, address:str, dayfeemotorbike: float, nightfeemotorbike: float, carfee: float, img_path:str):
+def create_parkinglot(name:str, address:str, lat:float, lng:float, dayfeemotorbike: float, nightfeemotorbike: float, carfee: float, img_path:str):
     try:
         with connectdb.session() as db:
-            newparkinglot = models.ParkingLot(name=name, address=address, dayfeemotorbike=dayfeemotorbike, nightfeemotorbike=nightfeemotorbike, carfee=carfee, imagepath=img_path)
+            newparkinglot = models.ParkingLot(name=name, address=address, lat=lat, lng=lng, dayfeemotorbike=dayfeemotorbike, 
+                                              nightfeemotorbike=nightfeemotorbike, carfee=carfee, imagepath=img_path)
             db.add(newparkinglot)
             db.commit()
             db.refresh(newparkinglot)

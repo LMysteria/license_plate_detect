@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import AdminHeader from "../../Components/AdminHeader";
 import Cookies from "js-cookie"
 import { getAuthHeader, getBackendContext } from "../../Util/AuthUtil";
+import { fromAddress } from "react-geocode";
+import { Map, Marker, APIProvider } from "@vis.gl/react-google-maps";
 
 const ParkingLotAdmin = () => {
     const [token] = useState(Cookies.get("Host-access_token") || "");
+    const mapRef = useRef(null);
     const [parkinglotlist, setParkinglotlist] = useState([])
     const [clickedParkinglot, setClickedParkinglot] = useState(0)
     const [isCreate, setIsCreate] = useState(true)
@@ -67,6 +70,8 @@ const ParkingLotAdmin = () => {
             const form = new FormData()
             form.append("name", parkingLotForm.name)
             form.append("address", parkingLotForm.address)
+            form.append("lat", parkingLotForm.lat)
+            form.append("lng", parkingLotForm.lng)
             form.append("dayfeemotorbike", parkingLotForm.dayfeemotorbike)
             form.append("nightfeemotorbike", parkingLotForm.nightfeemotorbike)
             form.append("carfee", parkingLotForm.carfee)
@@ -246,6 +251,21 @@ const ParkingLotAdmin = () => {
         </div>
     ))
 
+    const ParkingGeocodeSearch = (type) => {
+        const map = mapRef.current.map;
+        if (parkingLotForm.address !== ""){
+            fromAddress(parkingLotForm.address)
+            .then(({ results }) => {
+                const pos = results[0].geometry.location;
+                map.setCenter(pos)
+                parkingLotForm.lat = pos.lat
+                parkingLotForm.lng = pos.lng
+                setParkingLotForm(parkingLotForm)
+            })
+            .catch(console.error);
+        }
+    }
+
     return (
         <div>
             <AdminHeader />
@@ -267,23 +287,38 @@ const ParkingLotAdmin = () => {
             <div className="editbackground" id="editbackground">
                 <div className="edit" id="parkinglotform">
                     <h1>{isCreate ? "New" : "Edit"} Parking Lot</h1>
-                    <div>
+                    <div className="editdiv">
                         <label htmlFor="name">Name: </label>
                         <input type="text" name="name" value={parkingLotForm.name ? parkingLotForm.name : ""} onChange={onChangeParkingLotForm} />
                     </div>
-                    <div>
+                    <div className="editdiv">
                         <label htmlFor="address">Address: </label>
-                        <input type="text" name="address" value={parkingLotForm.address ? parkingLotForm.address : ""} onChange={onChangeParkingLotForm} />
+                        <input type="text" name="address" value={parkingLotForm.address ? parkingLotForm.address : ""} onChange={onChangeParkingLotForm} onBlur={ParkingGeocodeSearch}/>
                     </div>
-                    <div>
+                    <div className='admingooglemap'>
+                        <APIProvider apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY} onLoad={() => console.log('Maps API has loaded.')}>
+        
+                            <Map 
+                                id='map'
+                                disableDefaultUI={true}
+                                defaultZoom={13}
+                                defaultCenter={ {lat: parkingLotForm.lat?parkingLotForm.lat:10.762622, lng: parkingLotForm.lng?parkingLotForm.lng:106.660172} }
+                                onCameraChanged={(ev) => console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)}
+                                onTilesLoaded={(map) => {mapRef.current = map; console.log("Ref loaded", mapRef.current)}}
+                            >
+                                <Marker position={{lat: parkingLotForm.lat?parkingLotForm.lat:0, lng: parkingLotForm.lng?parkingLotForm.lng:0}}></Marker>:
+                            </Map>
+                        </APIProvider>
+                    </div>
+                    <div className="editdiv">
                         <label htmlFor="dayfeemotorbike">Day Motorbike Fee: </label>
                         <input type="text" name="dayfeemotorbike" value={parkingLotForm.dayfeemotorbike ? parkingLotForm.dayfeemotorbike : ""} onChange={onChangeParkingLotForm} />
                     </div>
-                    <div>
+                    <div className="editdiv">
                         <label htmlFor="nightfeemotorbike">Night Motorbike Fee: </label>
                         <input type="text" name="nightfeemotorbike" value={parkingLotForm.nightfeemotorbike ? parkingLotForm.nightfeemotorbike : ""} onChange={onChangeParkingLotForm} />
                     </div>
-                    <div>
+                    <div className="editdiv">
                         <label htmlFor="carfee">Car Fee: </label>
                         <input type="text" name="carfee" value={parkingLotForm.carfee ? parkingLotForm.carfee : ""} onChange={onChangeParkingLotForm} />
                     </div>
@@ -299,26 +334,26 @@ const ParkingLotAdmin = () => {
                             setFormImage(event.target.files[0]); // Update the state with the selected file
                         }}
                     />
-                    <div>
+                    <div className="editdiv">
                         <button onClick={onCancelParkingLotForm}>Cancel</button>
                         <button onClick={onSaveParkingLotForm}>Save</button>
                     </div>
                 </div>
                 <div className="edit" id="parkingareaform">
                     <h1>{isCreate ? "New" : "Edit"} Parking Area</h1>
-                    <div>
+                    <div className="editdiv">
                         <label htmlFor="area">Area: </label>
                         <input type="text" name="area" value={parkingAreaForm.area ? parkingAreaForm.area : ""} onChange={onChangeParkingAreaForm} />
                     </div>
-                    <div>
+                    <div className="editdiv">
                         <label htmlFor="maxspace">Maximum Space: </label>
                         <input type="text" name="maxspace" value={parkingAreaForm.maxspace ? parkingAreaForm.maxspace : ""} onChange={onChangeParkingAreaForm} />
                     </div>
-                    <div>
+                    <div className="editdiv">
                         <label htmlFor="remainingspace">Remaining Space: </label>
                         <input type="text" name="remainingspace" value={parkingAreaForm.remainingspace ? parkingAreaForm.remainingspace : ""} onChange={onChangeParkingAreaForm} />
                     </div>
-                    <div>
+                    <div className="editdiv">
                         <label htmlFor="iscar">Vehicle Type: </label>
                         <select name="iscar" onChange={onChangeParkingAreaForm}>
                             <option value={true} selected={parkingAreaForm.iscar ? "selected" : undefined}>Car</option>
@@ -337,7 +372,7 @@ const ParkingLotAdmin = () => {
                             setFormImage(event.target.files[0]); // Update the state with the selected file
                         }}
                     />
-                    <div>
+                    <div className="editdiv">
                         <button onClick={onCancelParkingAreaForm}>Cancel</button>
                         <button onClick={onSaveParkingAreaForm}>Save</button>
                     </div>

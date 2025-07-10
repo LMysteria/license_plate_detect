@@ -114,7 +114,7 @@ def parkinglotlist(search: str = "", skip: int = 0, limit: int = 10):
         parkinglottuple = parkinglot.tuple()
         parkinglotdata = parkinglottuple[0]
         
-        dataParkingLot = data.ParkingLot(id=parkinglotdata.id,name=parkinglotdata.name, address=parkinglotdata.address, dayfeemotorbike=parkinglotdata.dayfeemotorbike, nightfeemotorbike=parkinglotdata.nightfeemotorbike, carfee=parkinglotdata.carfee, car_remaining_space=0, motorbike_remaining_space=0, image_path="")
+        dataParkingLot = data.ParkingLot(id=parkinglotdata.id,name=parkinglotdata.name, address=parkinglotdata.address, lat=parkinglotdata.lat, lng = parkinglotdata.lng,  dayfeemotorbike=parkinglotdata.dayfeemotorbike, nightfeemotorbike=parkinglotdata.nightfeemotorbike, carfee=parkinglotdata.carfee, car_remaining_space=0, motorbike_remaining_space=0, image_path="")
         
         if(parkinglottuple[1]):
             dataParkingLot.car_remaining_space = parkinglottuple[1]
@@ -129,13 +129,13 @@ def parkinglotlist(search: str = "", skip: int = 0, limit: int = 10):
         
     return response
 
-def create_parkinglot(name:str, address:str, dayfeemotorbike: float, nightfeemotorbike: float, carfee: float, img: UploadFile = None):
+def create_parkinglot(name:str, address:str, lat:float, lng:float, dayfeemotorbike: float, nightfeemotorbike: float, carfee: float, img: UploadFile = None):
     relpath=""
     if(img):
         relpath = util.image_autonaming(img=img, destination_directory="parkinglotimage")
         fullpath = os.path.join(os.getcwd(),relpath)
         util.save_upload_file(img, Path(fullpath))
-    parkinglotdb = parkinglotcrud.create_parkinglot(name=name, address=address, 
+    parkinglotdb = parkinglotcrud.create_parkinglot(name=name, address=address, lat=lat, lng=lng,
                                                             dayfeemotorbike=dayfeemotorbike, nightfeemotorbike=nightfeemotorbike, carfee=carfee, img_path=relpath)
     return parkinglotdb
 
@@ -150,13 +150,13 @@ def create_parkingarea(parkinglotid:int, area:str, maxspace:int, remainingspace:
     parkingareadb = parkinglotcrud.create_parkingarea(parkinglotid=parkinglotid, area=area, maxspace=maxspace, remainingspace=remainingspace, iscar=iscar, img_path=relpath)
     return parkingareadb
 
-def update_parkinglot(parkinglotid: int, name:str, address:str, dayfeemotorbike: float, nightfeemotorbike: float, carfee: float, img: UploadFile = None):
+def update_parkinglot(parkinglotid: int, name:str, address:str, lat:float, lng:float, dayfeemotorbike: float, nightfeemotorbike: float, carfee: float, img: UploadFile = None):
     relpath=""
     if(img):
         relpath = util.image_autonaming(img=img, destination_directory="parkinglotimage")
         fullpath = os.path.join(os.getcwd(),relpath)
         util.save_upload_file(img, Path(fullpath))
-    parkinglotdb = parkinglotcrud.update_parkinglot(parkinglotid=parkinglotid, name=name, address=address, 
+    parkinglotdb = parkinglotcrud.update_parkinglot(parkinglotid=parkinglotid, name=name, address=address, lat=lat, lng=lng,
                                                             dayfeemotorbike=dayfeemotorbike, nightfeemotorbike=nightfeemotorbike, carfee=carfee, img_path=relpath)
     return parkinglotdb
         

@@ -56,6 +56,8 @@ class ParkingLot(Base):
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
     name = Column(VARCHAR(255), nullable=False)
     address = Column(VARCHAR(255), nullable=False)
+    lat = Column(Double, nullable=False)
+    lng = Column(Double, nullable=False)
     imagepath = Column(VARCHAR(255))
     dayfeemotorbike = Column(Double)        #per 4 hour
     nightfeemotorbike = Column(Double)      #per 4 hour

@@ -16,11 +16,11 @@ def get_parkingdata_detail(parkingdataid:int):
     return response
 
 @parkinglotrouter.post("/create")
-def create_parkinglot(name:Annotated[str, Form()], address:Annotated[str, Form()], 
+def create_parkinglot(name:Annotated[str, Form()], address:Annotated[str, Form()], lat:Annotated[float, Form()], lng:Annotated[float, Form()],
                       dayfeemotorbike:Annotated[float, Form()], nightfeemotorbike:Annotated[float, Form()], carfee:Annotated[float, Form()],
                       img: Annotated[UploadFile, None] = None):
     start = time.time()
-    response = parkinglotutil.create_parkinglot(name=name, address=address, dayfeemotorbike=dayfeemotorbike, nightfeemotorbike=nightfeemotorbike, carfee=carfee, img=img)
+    response = parkinglotutil.create_parkinglot(name=name, address=address, lat=lat, lng=lng, dayfeemotorbike=dayfeemotorbike, nightfeemotorbike=nightfeemotorbike, carfee=carfee, img=img)
     util.time_message(f"create parking lot successfully",start)
     return response
 
@@ -48,11 +48,11 @@ def parking_exit(img: UploadFile, parkingareaid: Annotated[int, Form()], userid:
     return response
 
 @parkinglotrouter.post("/update")
-def update_parkingarea_image(parkinglotid: Annotated[int, Form()], name:Annotated[str, Form()], address:Annotated[str, Form()], 
+def update_parkingarea_image(parkinglotid: Annotated[int, Form()], name:Annotated[str, Form()], address:Annotated[str, Form()], lat:Annotated[float, Form()], lng:Annotated[float, Form()],
                              dayfeemotorbike:Annotated[float, Form()], nightfeemotorbike:Annotated[float, Form()], carfee:Annotated[float, Form()], 
                              img: Annotated[UploadFile, None] = None):
     start = time.time()
-    response = parkinglotutil.update_parkinglot(img=img, parkinglotid=parkinglotid, name=name, address=address,
+    response = parkinglotutil.update_parkinglot(img=img, parkinglotid=parkinglotid, name=name, address=address, lat=lat, lng=lng,
                                             dayfeemotorbike=dayfeemotorbike, nightfeemotorbike=nightfeemotorbike, carfee=carfee)
     util.time_message(f"update parkinglotid {parkinglotid} detail successfully",start)
     return response

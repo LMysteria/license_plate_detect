@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { getBackendContext } from "../Util/AuthUtil";
+import { useMap } from "@vis.gl/react-google-maps";
 
-const ParkingLot = () => {
+const ParkingLot = ({setParkingLotMarker}) => {
     const [parkinglotlist, setParkinglotlist] = useState([])
     const [clickedParkinglot, setClickedParkinglot] = useState(0)
     const [displayParkingArea, setParkingArea] = useState([])
@@ -26,6 +27,8 @@ const ParkingLot = () => {
 
     useEffect(() => {
         if (clickedParkinglot>0){
+            const result = parkinglotlist.filter((parkinglot) => {return parkinglot.id===clickedParkinglot})[0]
+            setParkingLotMarker({lat: result.lat, lng: result.lng})
             fetch(`${getBackendContext()}/parkinglot/parkingarea/list?parkinglotid=${clickedParkinglot}`, {
                 method: "GET",
             })
@@ -39,12 +42,13 @@ const ParkingLot = () => {
     }, [clickedParkinglot])
 
     const onClickParkingLot = (event) => {
-        setClickedParkinglot(event.target.getAttribute("parkinglotid"))
+        console.log(event.target.getAttribute("parkinglotid"))
+        setClickedParkinglot(parseInt(event.target.getAttribute("parkinglotid")))
     }
     
     const parkinglots = parkinglotlist.map((val) => (
             <div key={val.id} parkinglotid={val.id} className="parkinglotitem" onClick={onClickParkingLot}>
-                <p>Name: {val.name}<br />
+                <p parkinglotid={val.id}>Name: {val.name}<br />
                 Address: {val.address}<br />
                 Car Remaining Space: {val.car_remaining_space}<br />
                 Motorbike Remaining Space: {val.motorbike_remaining_space}</p>
