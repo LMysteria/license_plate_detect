@@ -10,6 +10,7 @@ import ParkingLotAdmin from './Pages/Admin/ParkingLotAdmin';
 import FeedBackPage from './Pages/User/FeedBack';
 import InsertMoneyPage from './Pages/User/InsertMoney';
 import TransactionPage from './Pages/User/Transaction';
+import ManageParkingStation from './Pages/Admin/ManageParkingStation';
 import {setDefaults} from 'react-geocode'
 
 
@@ -33,6 +34,7 @@ function App() {
         <Route path="/transaction" element={<TransactionPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path='/admin/parkinglot' element={<ParkingLotAdmin />} />
+        <Route path='/admin/parkingarea/:id' element={<ManageParkingStation />} />
         <Route path="*" element={<Navigate to="/"/>} />
       </Routes>
     </Router>

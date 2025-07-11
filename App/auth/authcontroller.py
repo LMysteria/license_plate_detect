@@ -187,3 +187,31 @@ async def check_adminpage_access(user: Annotated[data.User, Depends(get_current_
         raise access_exception
     except Exception as e:
         raise e
+    
+async def check_camera_access(token: Annotated[str, None] = None) -> data.User:
+    access_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Access Denied",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    try:
+        if token is None:
+            raise access_exception
+        payload = jwt.decode(token, get_SECRET_KEY(), algorithms=[authconfig.ALGORITHM])
+        username = payload.get("sub")
+        if username is None:
+            raise access_exception
+        dbuser = authcrud.get_user_by_username(username=username)
+        if dbuser is None:
+            raise access_exception
+        user = data.User(id=dbuser.id, username=dbuser.username)
+        dbadminpage = authcrud.get_access_by_name("adminpage")
+        dbuserdetail = authcrud.get_userdetails_by_userid(userid=user.id)
+        dbroleAccess = authcrud.get_role_access_by_roleid(id=dbuserdetail.roleid)
+        for access in dbroleAccess:
+            if access.id == dbadminpage.id:
+                return user
+        raise access_exception
+    except Exception as e:
+        raise e

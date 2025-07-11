@@ -8,4 +8,8 @@ const getBackendContext = () => {
     return "http://localhost:8000"
 }
 
-export {getAuthHeader, getBackendContext};
+const getWebsocketContext = () => {
+    return "ws://localhost:8000"
+}
+
+export {getAuthHeader, getBackendContext, getWebsocketContext};

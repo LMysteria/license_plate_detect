@@ -1,8 +1,11 @@
-from fastapi import APIRouter, UploadFile, Form
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, UploadFile, Form, WebSocket, WebSocketDisconnect
+import asyncio
+from fastapi.responses import StreamingResponse
 from typing import Annotated
 from . import parkinglotcrud, parkinglotutil
 from ... import util
+from ...licensedetection.webcam import webcam
+from ...auth import authcontroller
 import time
 
 parkinglotrouter = APIRouter(prefix="/parkinglot", tags=["parkinglot"])
@@ -14,6 +17,21 @@ def get_parkingdata_detail(parkingdataid:int):
     response = parkinglotcrud.get_parkingdata_by_id(id=parkingdataid)
     util.time_message("get parking data with id {}".format(parkingdataid), starttime=start)
     return response
+
+@ParkinglotUserrouter.websocket("/parkingarea/camera")
+async def get_parkingarea_camera(parkingareaid:int, ischeckin:bool, camera_num:int, websocket: WebSocket):
+    print("Attempt connect")
+    await websocket.accept()
+    print("Websocket connected")
+    try:
+        await webcam(parkingareaid=parkingareaid, isCheckIn=ischeckin, camera_num=camera_num, websocket=websocket)
+    except WebSocketDisconnect:
+        print("client disconnected")
+    except Exception as e:
+        raise e
+    finally:
+        await websocket.close()
+        print("Websocket close")
 
 @parkinglotrouter.post("/create")
 def create_parkinglot(name:Annotated[str, Form()], address:Annotated[str, Form()], lat:Annotated[float, Form()], lng:Annotated[float, Form()],
