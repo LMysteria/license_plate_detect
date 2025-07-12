@@ -40,6 +40,8 @@ def parking_exit(img: UploadFile, parkingareaid:int, userid:int, detected:str):
         dbimage = crud.create_image(relpath, type="detect")
         licensedb = crud.create_detectedlicense(license_number=detected, image_id=dbimage.id)
         entryparkingdb = parkinglotcrud.get_last_parkingdata_by_licensenumber(licensenumber=licensedb.license_number, parkingareaid=parkingareaid)
+        if(not entryparkingdb):
+            raise HTTPException(status_code=400, detail="parkingdata with userid {} not found".format(userid))
         
         parkingdb = entryparkingdb
         if (not entryparkingdb.manualcheckid):

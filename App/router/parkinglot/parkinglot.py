@@ -51,15 +51,17 @@ def create_parkinglot(area:Annotated[str, Form()], maxspace:Annotated[int, Form(
     util.time_message(f"create parking area in parking lotid {parkinglotid} successfully",start)
     return response
 
-@parkinglotrouter.post("/parkingarea/parkingdata/entry")
-def parking_entry(img: UploadFile, parkingareaid: Annotated[int, Form()], userid: Annotated[int, Form()], license: Annotated[str, Form()]):
+@ParkinglotUserrouter.post("/parkingarea/parkingdata/entry")
+def parking_entry(img: UploadFile, parkingareaid: Annotated[int, Form()], userid: Annotated[int, Form()], license: Annotated[str, Form()], token: Annotated[str, Form()]):
+    authcontroller.check_ADMIN_KEY(token=token)
     start = time.time()
     response = parkinglotutil.parking_entry(img=img, parkingareaid=parkingareaid, userid=userid, detected=license)
     util.time_message(f"parkingdata for userid {userid} entry parking areaid {parkingareaid} successfully",start)
     return response
 
-@parkinglotrouter.post("/parkingarea/parkingdata/exit")
-def parking_exit(img: UploadFile, parkingareaid: Annotated[int, Form()], userid: Annotated[int, Form()], license: Annotated[str, Form()]):
+@ParkinglotUserrouter.post("/parkingarea/parkingdata/exit")
+def parking_exit(img: UploadFile, parkingareaid: Annotated[int, Form()], userid: Annotated[int, Form()], license: Annotated[str, Form()], token: Annotated[str, Form()]):
+    authcontroller.check_ADMIN_KEY(token=token)
     start = time.time()
     response = parkinglotutil.parking_exit(img=img, parkingareaid=parkingareaid, userid=userid, detected=license)
     util.time_message(f"parkingdata for userid {userid} exit parking areaid {parkingareaid} successfully",start)

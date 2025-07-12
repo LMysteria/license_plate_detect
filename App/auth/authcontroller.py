@@ -26,6 +26,25 @@ def get_SECRET_KEY() -> str:
             config.writelines(f"SECRET_KEY=\"{SECRET_KEY}\"")
     return SECRET_KEY
 
+def get_ADMIN_KEY() -> str:
+    keypath = path.join(getcwd(), "App", "keys", "auth.env")
+    load_dotenv(find_dotenv(keypath,usecwd=True))
+    ADMIN_KEY = getenv("ADMIN_KEY")
+    if not ADMIN_KEY:
+        ADMIN_KEY = subprocess.run(["openssl","rand","-hex","32"], stdout=subprocess.PIPE, shell=True).stdout.decode("utf-8").strip()
+        with open(keypath,"a") as config:
+            config.writelines(f"ADMIN_KEY=\"{ADMIN_KEY}\"")
+    return ADMIN_KEY
+
+def check_ADMIN_KEY(token:str):
+    access_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Access Denied",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    if(token != get_ADMIN_KEY()):
+        raise access_exception
+
 
 #get hashed version of password
 def get_password_hash(password) -> str:
@@ -215,3 +234,4 @@ async def check_camera_access(token: Annotated[str, None] = None) -> data.User:
         raise access_exception
     except Exception as e:
         raise e
+    

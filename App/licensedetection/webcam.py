@@ -1,19 +1,14 @@
-from PIL import Image
 import cv2
 import torch
-import math 
 from .function import utils_rotate
-import os
 import time
-import argparse
 from .function import helper
 import warnings
 import requests
 import asyncio
-import base64
-from datetime import timedelta
 from fastapi import WebSocket, WebSocketDisconnect
 from starlette.websockets import WebSocketState
+from..auth.authcontroller import get_ADMIN_KEY
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 #User tags
@@ -25,6 +20,7 @@ yolo_license_plate.conf = 0.60
 
 async def webcam(parkingareaid:int, isCheckIn:bool, camera_num:int, websocket:WebSocket):
     
+    backendcontext = "http://localhost:8000"
     global yolo_LP_detect
     global yolo_license_plate
 
@@ -80,20 +76,20 @@ async def webcam(parkingareaid:int, isCheckIn:bool, camera_num:int, websocket:We
                     print("Send detected license {}".format(pre_lp))
                     cv2.imwrite("temp.jpg",frame)
                     start = time.time()
-                    """form = {"parkingareaid":parkingareaid, "userid":userid, "license":lp}
+                    form = {"parkingareaid":parkingareaid, "userid":userid, "license":lp, "token":get_ADMIN_KEY()}
                     images = {'img': open('temp.jpg','rb')}
                     print(form)
                     if(isCheckIn):
-                        response = requests.post(f"{backendcontext}/admin/parkinglot/parkingarea/parkingdata/entry",data=form, headers={f"Authorization": "Bearer "+token}, files=images)
+                        response = requests.post(f"{backendcontext}/parkinglot/parkingarea/parkingdata/entry",data=form, files=images)
                     else:
-                        response = requests.post(f"{backendcontext}/admin/parkinglot/parkingarea/parkingdata/exit",data=form, headers={f"Authorization": "Bearer "+token}, files=images)
+                        response = requests.post(f"{backendcontext}/parkinglot/parkingarea/parkingdata/exit",data=form, files=images)
                     if response.status_code == 200:
-                        print("Record successful")
+                        websocket.send_text("Record successful")
                         print(response.json())
                     else:
-                        print("Record Failed")
+                        websocket.send_text("Record Failed")
                         print(response.json())
-                    print("Receive response in: {}s".format(time.time()-start))"""
+                    print("Receive response in: {}s".format(time.time()-start))
             new_frame_time = time.time()
             fps = 1/(new_frame_time-prev_frame_time)
             prev_frame_time = new_frame_time
