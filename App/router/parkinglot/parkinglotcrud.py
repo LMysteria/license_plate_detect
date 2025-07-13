@@ -4,6 +4,7 @@ from ...util import time_message
 import time
 from sqlalchemy import func
 from sqlalchemy.sql.functions import now
+from math import cos, pi
 
 #GET
 def get_parkingdata_by_id(id:int) -> models.ParkingData:
@@ -38,7 +39,7 @@ def get_parkingarea_by_parkinglotid(parkinglotid: int):
     except Exception as e:
         raise e
     
-def get_parkinglot_list(searchpattern: str = "%%", skip: int=0, limit: int=10):
+def get_parkinglot_list(lat:float, lng:float, skip: int=0, limit: int=10):
     try:
         with connectdb.session() as db:
             
@@ -52,14 +53,21 @@ def get_parkinglot_list(searchpattern: str = "%%", skip: int=0, limit: int=10):
                                         ).group_by(models.ParkingArea.parkinglotid
                                         ).subquery()
             
+            #5km offset
+            latOffset = 5/111 
+            lngOffset = 5/(111 * cos(lat * pi / 180))
+            
+            south = lat-latOffset
+            north = lat+latOffset
+            west = lng-lngOffset
+            east = lng+lngOffset
             dbparkinglist = db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
                             ).outerjoin(car_remaing_space, car_remaing_space.c.parkinglotid == models.ParkingLot.id
                             ).outerjoin(motorbike_remaing_space, motorbike_remaing_space.c.parkinglotid == models.ParkingLot.id
-                            ).filter(models.ParkingLot.name.like(searchpattern)|models.ParkingLot.address.like(searchpattern)
+                            ).filter(models.ParkingLot.lat.between(south, north), models.ParkingLot.lng.between(west, east)
                             ).offset(offset=skip
                             ).limit(limit=limit
                             ).all()
-
             return dbparkinglist
     except Exception as e:
         raise e

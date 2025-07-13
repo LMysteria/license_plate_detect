@@ -100,9 +100,9 @@ def get_parkinglot_detail(parkinglotid:int):
     return response
 
 @ParkinglotUserrouter.get("/list")
-def get_parkinglot_list(search: str = "", skip: int = 0, limit: int = 10):
+def get_parkinglot_list(lat:float, lng:float, skip: int = 0, limit: int = 10):
     start = time.time()
-    response = parkinglotutil.parkinglotlist(search=search, skip=skip,limit=limit)
+    response = parkinglotutil.parkinglotlist(lat=lat, lng=lng, skip=skip,limit=limit)
     util.time_message(f"search parking lot list",start)
     return response
 

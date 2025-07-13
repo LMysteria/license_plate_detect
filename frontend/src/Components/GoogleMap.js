@@ -1,5 +1,5 @@
 import {Map, Marker} from '@vis.gl/react-google-maps';
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {fromAddress} from 'react-geocode'
 import { getBackendContext } from "../Util/AuthUtil";
 import DirectionDisplay from './DirectionDisplay';
@@ -12,9 +12,25 @@ const CustomGoogleMap = () => {
     const [parkinglotlist, setParkinglotlist] = useState([])
     const [clickedParkinglot, setClickedParkinglot] = useState(0)
     const [displayParkingArea, setParkingArea] = useState([])
+    const [geolocation, setGeolocation] = useState()
 
-    const getParkinglotlist = (search="") => {
-        fetch(`${getBackendContext()}/parkinglot/list?search=${search}`,{
+    const getGeolocation = () => {
+        const map = mapRef.current.map
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const pos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                };
+                map.setCenter(pos)
+                setGeolocation(pos)
+                getParkinglotList(pos)
+            })
+        }
+    }
+
+    const getParkinglotList = ({lat, lng}) => {
+        fetch(`${getBackendContext()}/parkinglot/list?lat=${lat}&lng=${lng}`,{
             method: "GET",
         })
         .then((response) => response.json())
@@ -22,13 +38,6 @@ const CustomGoogleMap = () => {
         .catch((err)=> console.log(err))
         setParkingArea([]);
     }
-
-    useEffect(() => {
-        if(parkinglotlist.length === 0){
-            getParkinglotlist()
-        }
-    }, [parkinglotlist])
-
 
     useEffect(() => {
         if (clickedParkinglot>0){
@@ -57,22 +66,42 @@ const CustomGoogleMap = () => {
     };
 
     const PositionSearch = () => {
-        const map = mapRef.current.map;
+        const map = mapRef.current.map
         fromAddress(input.currentposition)
         .then(({ results }) => {
             const pos = results[0].geometry.location;
             map.setCenter(pos)
             setCurrentMarkers(pos)
+            getParkinglotList(pos)
         })
         .catch(console.error);
     }  
 
     const Search = () => {
-        getParkinglotlist(input.searchParkinglot)
+        const map = mapRef.current.map
+        const destination = input.searchParkinglot
+        if(destination){
+            fromAddress(destination)
+            .then(({ results }) => {
+                const pos = results[0].geometry.location;
+                
+                getParkinglotList(pos)
+            })
+            .catch(console.error);
+        }
+
+        else{
+            if(geolocation){
+                map.setCenter(geolocation)
+                getParkinglotList(geolocation)
+            } else {
+                getGeolocation()
+            }
+        }
     }
 
     const onClickParkingLot = (event) => {
-        const map = mapRef.current.map;
+        const map = mapRef.current.map
         const clicked = parseInt(event.target.getAttribute("parkinglotid"))
         setClickedParkinglot(clicked)
         const result = parkinglotlist.filter((parkinglot) => {return parkinglot.id===clicked})[0]
@@ -124,7 +153,7 @@ const CustomGoogleMap = () => {
                 </div>
                 <div>
                     <div className="parkinglotsearch">
-                        <input type="text" name="searchParkinglot" placeholder="parkinglot search" onChange={handleChange} className="ParkinglotSearch"/>
+                        <input type="text" name="searchParkinglot" placeholder="Destination for search" onChange={handleChange} className="ParkinglotSearch"/>
                         <button name="Search" onClick={Search}>Search</button>
                     </div>
                     <div className="parkinglotdisplay">

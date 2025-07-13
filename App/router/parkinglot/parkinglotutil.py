@@ -105,12 +105,9 @@ def isday(vartime: datetime) -> bool:
 def feecalculator(feetype:float, parkinghour:int):
     return feetype*((parkinghour//4)+1)
 
-def parkinglotlist(search: str = "", skip: int = 0, limit: int = 10):
+def parkinglotlist(lat:float, lng:float, skip: int = 0, limit: int = 10):
     response = list[data.ParkingLot]()
-    if not search:
-        dbresponse = parkinglotcrud.get_parkinglot_list(skip=skip, limit=limit)
-    else:
-        dbresponse = parkinglotcrud.get_parkinglot_list(searchpattern="%{}%".format(search),skip=skip, limit=limit)
+    dbresponse = parkinglotcrud.get_parkinglot_list(lat=lat, lng=lng, skip=skip, limit=limit)
     
     for parkinglot in dbresponse:
         parkinglottuple = parkinglot.tuple()
