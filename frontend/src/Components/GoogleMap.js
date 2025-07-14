@@ -72,7 +72,6 @@ const CustomGoogleMap = () => {
             const pos = results[0].geometry.location;
             map.setCenter(pos)
             setCurrentMarkers(pos)
-            getParkinglotList(pos)
         })
         .catch(console.error);
     }  
@@ -139,7 +138,7 @@ const CustomGoogleMap = () => {
                     defaultZoom={13}
                     defaultCenter={ center }
                     onCameraChanged={(ev) => console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)}
-                    onTilesLoaded={(map) => {mapRef.current = map; console.log("Ref loaded", mapRef.current)}}
+                    onTilesLoaded={(map) => {mapRef.current = map; console.log("Ref loaded", mapRef.current); getGeolocation()}}
                 >
                     <Marker position={currentMarker}/>
                     <Marker position={parkinglotMarker}/>
@@ -149,7 +148,7 @@ const CustomGoogleMap = () => {
             <div className="parkinglotdiv">
                 <div>
                     <input type="text" name="currentposition" placeholder="current position" className="ParkinglotSearch" onChange={handleChange}/>
-                    <button onClick={PositionSearch}>Search</button>
+                    <button onClick={PositionSearch}>Enter</button>
                 </div>
                 <div>
                     <div className="parkinglotsearch">

@@ -4,6 +4,7 @@ import ParkingAreaCamera from "../../Components/ParkingAreaCamera"
 
 const ManageParkingStation = () => {
     const params = useParams()
+    
 
     return(
         <div>

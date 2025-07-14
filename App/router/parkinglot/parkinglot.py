@@ -6,6 +6,10 @@ from . import parkinglotcrud, parkinglotutil
 from ... import util
 from ...licensedetection.webcam import webcam
 from ...auth import authcontroller
+from ..user import usercrud
+from ...database.crud import get_image_byID
+from ...schema.data import ParkingData
+from datetime import datetime
 import time
 
 parkinglotrouter = APIRouter(prefix="/parkinglot", tags=["parkinglot"])
@@ -17,6 +21,23 @@ def get_parkingdata_detail(parkingdataid:int):
     response = parkinglotcrud.get_parkingdata_by_id(id=parkingdataid)
     util.time_message("get parking data with id {}".format(parkingdataid), starttime=start)
     return response
+
+@parkinglotrouter.get("/parkingarea/parkingdata/last")
+def get_parkingdata_detail(parkingareaid:int, userid:Annotated[int, None] = None, licenseplate:Annotated[str,None]= None):
+    start = time.time()
+    if(userid):
+        response = parkinglotcrud.get_last_parkingdata_by_userid(parkingareaid=parkingareaid, userid=userid)
+        util.time_message("get parking data with userid {}".format(userid), starttime=start)
+    else:
+        response = parkinglotcrud.get_last_parkingdata_by_licensenumber(parkingareaid=parkingareaid, licensenumber=licenseplate)
+        util.time_message("get parking data with license {}".format(licenseplate), starttime=start)
+    transaction = usercrud.get_transaction_by_parkingid(parkingdataid=response.id)
+    if(response.exit_time):
+        return ParkingData(id=response.id, userid=transaction.userid, license=response.license, 
+                       entry_time=datetime.strftime(response.entry_time,"%X, %x"), entry_path=get_image_byID(response.entry_img).path, 
+                       exit_time=datetime.strftime(response.exit_time,"%X, %x"), exit_path=get_image_byID(response.exit_img).path)
+    return ParkingData(id=response.id, userid=transaction.userid, license=response.license, 
+                       entry_time=datetime.strftime(response.entry_time,"%X, %x"), entry_path=get_image_byID(response.entry_img).path)
 
 @ParkinglotUserrouter.websocket("/parkingarea/camera")
 async def get_parkingarea_camera(parkingareaid:int, ischeckin:bool, camera_num:int, websocket: WebSocket):
@@ -35,7 +56,7 @@ async def get_parkingarea_camera(parkingareaid:int, ischeckin:bool, camera_num:i
 
 @parkinglotrouter.post("/create")
 def create_parkinglot(name:Annotated[str, Form()], address:Annotated[str, Form()], lat:Annotated[float, Form()], lng:Annotated[float, Form()],
-                      dayfeemotorbike:Annotated[float, Form()], nightfeemotorbike:Annotated[float, Form()], carfee:Annotated[float, Form()],
+                      dayfeemotorbike:Annotated[float, Form()]=0, nightfeemotorbike:Annotated[float, Form()]=0, carfee:Annotated[float, Form()]=0,
                       img: Annotated[UploadFile, None] = None):
     start = time.time()
     response = parkinglotutil.create_parkinglot(name=name, address=address, lat=lat, lng=lng, dayfeemotorbike=dayfeemotorbike, nightfeemotorbike=nightfeemotorbike, carfee=carfee, img=img)
@@ -100,9 +121,9 @@ def get_parkinglot_detail(parkinglotid:int):
     return response
 
 @ParkinglotUserrouter.get("/list")
-def get_parkinglot_list(lat:float, lng:float, skip: int = 0, limit: int = 10):
+def get_parkinglot_list(lat:Annotated[float, None]= None, lng:Annotated[float, None]= None, skip: int = 0, limit: int = 10, search:Annotated[str, None]=None):
     start = time.time()
-    response = parkinglotutil.parkinglotlist(lat=lat, lng=lng, skip=skip,limit=limit)
+    response = parkinglotutil.parkinglotlist(lat=lat, lng=lng, skip=skip,limit=limit, search=search)
     util.time_message(f"search parking lot list",start)
     return response
 
@@ -118,4 +139,11 @@ def get_parkinglot_list(parkinglotid: int):
     start = time.time()
     response = parkinglotcrud.get_parkingarea_by_parkinglotid(parkinglotid=parkinglotid)
     util.time_message(f"get parking area list in parking lotid {parkinglotid}",start)
+    return response
+
+@parkinglotrouter.post("/parkingarea/parkingdata/exit/manual")
+def parking_exit(img: UploadFile, parkingdataid: Annotated[int, Form()]):
+    start = time.time()
+    response = parkinglotutil.manual_exit(img=img, parkingdataid=parkingdataid)
+    util.time_message(f"Manual Exit for parkingdata {parkingdataid}",start)
     return response

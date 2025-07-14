@@ -5,7 +5,8 @@ const AdminPage = () => {
     return(
         <div>
             <AdminHeader />
-            <a href="/admin/parkinglot">Parking Lot</a>
+            <a href="/admin/parkinglot">Parking Lot</a><br/>
+            <a href="/admin/parkingarea/1">Manage Parking Area 1</a>
         </div>
     )
 }

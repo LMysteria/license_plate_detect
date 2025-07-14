@@ -42,7 +42,7 @@ async def webcam(parkingareaid:int, isCheckIn:bool, camera_num:int, websocket:We
                 print("frame not capture")
                 continue
             
-            plates = yolo_LP_detect(frame, size=640)
+            plates = yolo_LP_detect(frame, size=192)
             list_plates = plates.pandas().xyxy[0].values.tolist()
             list_read_plates = set()
             for plate in list_plates:

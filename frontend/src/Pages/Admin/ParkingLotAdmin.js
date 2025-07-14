@@ -72,8 +72,11 @@ const ParkingLotAdmin = () => {
             form.append("address", parkingLotForm.address)
             form.append("lat", parkingLotForm.lat)
             form.append("lng", parkingLotForm.lng)
+            if(parkingLotForm.dayfeemotorbike)
             form.append("dayfeemotorbike", parkingLotForm.dayfeemotorbike)
+            if(parkingLotForm.nightfeemotorbike)
             form.append("nightfeemotorbike", parkingLotForm.nightfeemotorbike)
+            if(parkingLotForm.carfee)
             form.append("carfee", parkingLotForm.carfee)
             if (formImage) {
                 form.append("img", formImage)
@@ -226,44 +229,50 @@ const ParkingLotAdmin = () => {
     }
 
     const parkinglots = parkinglotlist.map((val) => (
-        <div key={val.id} parkinglotid={val.id} className="parkinglotitem" onClick={onClickParkingLot}>
-            <p>Name: {val.name}<br />
+        <div key={val.id} parkinglotid={val.id} className="adminparkinglotitem" onClick={onClickParkingLot}>
+            <p parkinglotid={val.id}>Name: {val.name}<br />
                 Address: {val.address}<br />
-                Day Motorbike Fee: {val.dayfeemotorbike}<br />
-                Night Motorbike Fee: {val.nightfeemotorbike}<br />
-                Car Fee: {val.carfee}<br />
+                Day Motorbike Fee: {val.dayfeemotorbike}/4h<br />
+                Night Motorbike Fee: {val.nightfeemotorbike}/4h<br />
+                Car Fee: {val.carfee}/4h<br />
                 Car Remaining Space: {val.car_remaining_space}<br />
                 Motorbike Remaining Space: {val.motorbike_remaining_space}</p>
-            <img src={val.image_path ? `${getBackendContext()}/${val.image_path}` : undefined} alt="No img" className="parkinglotimage" />
-            <button type="button" onClick={EditParkingLot}>Edit</button>
-            <button type="button" onClick={createParkingArea}>Create Parking Area</button>
+            <div parkinglotid={val.id}>
+                <img parkinglotid={val.id} src={val.image_path ? `${getBackendContext()}/${val.image_path}` : undefined} alt="No img" className="parkinglotimage" />
+                <button type="button" onClick={EditParkingLot}>Edit</button>
+                <button type="button" onClick={createParkingArea}>Create Parking Area</button>
+            </div>
         </div>
     ))
 
     const parkingareas = displayParkingArea.map((val) => (
-        <div key={val.id} parkingareaid={val.id} className="parkinglotitem">
-            <p>Area name: {val.area}<br />
+        <div key={val.id} parkingareaid={val.id} className="adminparkinglotitem">
+            <p >Area name: {val.area}<br />
                 Type: {val.iscar ? "car" : "motorbike"}<br />
                 Remaining Space: {val.remainingspace}<br />
             </p>
-            <img src={val.imagepath ? `${getBackendContext()}/${val.imagepath}` : undefined} alt="No img" className="parkinglotimage" />
-            <button type="button" onClick={EditParkingArea}>Edit</button>
+            <div>
+                <img src={val.imagepath ? `${getBackendContext()}/${val.imagepath}` : undefined} alt="No img" className="parkinglotimage" />
+                <button type="button" onClick={EditParkingArea}>Edit</button>
+            </div>
         </div>
     ))
 
     const ParkingGeocodeSearch = (type) => {
         const map = mapRef.current.map;
+        if((parkingLotForm.address !== undefined)){
         if (parkingLotForm.address !== ""){
             fromAddress(parkingLotForm.address)
             .then(({ results }) => {
                 const pos = results[0].geometry.location;
                 map.setCenter(pos)
+                console.log(pos)
                 parkingLotForm.lat = pos.lat
                 parkingLotForm.lng = pos.lng
                 setParkingLotForm(parkingLotForm)
             })
             .catch(console.error);
-        }
+        }}
     }
 
     return (
@@ -306,7 +315,7 @@ const ParkingLotAdmin = () => {
                                 onCameraChanged={(ev) => console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)}
                                 onTilesLoaded={(map) => {mapRef.current = map; console.log("Ref loaded", mapRef.current)}}
                             >
-                                <Marker position={{lat: parkingLotForm.lat?parkingLotForm.lat:0, lng: parkingLotForm.lng?parkingLotForm.lng:0}}></Marker>:
+                                <Marker position={parkingLotForm.lat?{lat:parkingLotForm.lat,lng:parkingLotForm.lng}:{lat:0,lng:0}}/>
                             </Map>
                         </APIProvider>
                     </div>

@@ -38,3 +38,12 @@ class ParkingLot(BaseModel):
     car_remaining_space: int
     motorbike_remaining_space: int
     image_path: str
+    
+class ParkingData(BaseModel):
+    id: int
+    userid: int
+    license: str
+    entry_time: str
+    entry_path: str
+    exit_time: Annotated[str, None] = None
+    exit_path: Annotated[str, None] = None

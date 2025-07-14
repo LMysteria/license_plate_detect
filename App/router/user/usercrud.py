@@ -44,10 +44,10 @@ def update_userbalance(user:models.User, balancechange:float) -> models.UserDeta
         db.refresh(dbuserdetail)
     return dbuserdetail
 
-def update_transaction_change(parkingdataid:int, userid:int, change:float):
+def update_transaction_change(parkingdataid:int, change:float):
     try:
         with connectdb.session() as db:
-            dbtransaction = get_transaction_by_userid_parkingid(userid=userid, parkingdataid=parkingdataid)
+            dbtransaction = get_transaction_by_parkingid(parkingdataid=parkingdataid)
             dbtransaction.balancechanges = round(change,2)
             print(dbtransaction.balancechanges)
             db.add(dbtransaction)

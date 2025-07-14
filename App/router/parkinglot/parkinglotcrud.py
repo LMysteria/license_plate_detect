@@ -3,6 +3,7 @@ from ...schema import data
 from ...util import time_message
 import time
 from sqlalchemy import func
+from sqlalchemy.sql import or_, and_
 from sqlalchemy.sql.functions import now
 from math import cos, pi
 
@@ -39,7 +40,7 @@ def get_parkingarea_by_parkinglotid(parkinglotid: int):
     except Exception as e:
         raise e
     
-def get_parkinglot_list(lat:float, lng:float, skip: int=0, limit: int=10):
+def get_parkinglot_list(search:str, lat:float, lng:float, skip: int=0, limit: int=10):
     try:
         with connectdb.session() as db:
             
@@ -53,21 +54,56 @@ def get_parkinglot_list(lat:float, lng:float, skip: int=0, limit: int=10):
                                         ).group_by(models.ParkingArea.parkinglotid
                                         ).subquery()
             
-            #5km offset
-            latOffset = 5/111 
-            lngOffset = 5/(111 * cos(lat * pi / 180))
-            
-            south = lat-latOffset
-            north = lat+latOffset
-            west = lng-lngOffset
-            east = lng+lngOffset
-            dbparkinglist = db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
-                            ).outerjoin(car_remaing_space, car_remaing_space.c.parkinglotid == models.ParkingLot.id
-                            ).outerjoin(motorbike_remaing_space, motorbike_remaing_space.c.parkinglotid == models.ParkingLot.id
-                            ).filter(models.ParkingLot.lat.between(south, north), models.ParkingLot.lng.between(west, east)
-                            ).offset(offset=skip
-                            ).limit(limit=limit
-                            ).all()
+            if((lat != None) | (lng != None)):
+                #5km offset
+                latOffset = 5/111 
+                lngOffset = 5/(111 * cos(lat * pi / 180))
+                
+                south = lat-latOffset
+                north = lat+latOffset
+                west = lng-lngOffset
+                east = lng+lngOffset
+                
+                if((not search.isspace()) & (search != "") & (search != None)):
+                    dbparkinglist = db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
+                                    ).outerjoin(car_remaing_space, car_remaing_space.c.parkinglotid == models.ParkingLot.id
+                                    ).outerjoin(motorbike_remaing_space, motorbike_remaing_space.c.parkinglotid == models.ParkingLot.id
+                                    ).filter(or_(
+                                        and_(models.ParkingLot.lat.between(south, north), 
+                                            models.ParkingLot.lng.between(west, east)),
+                                        models.ParkingLot.name.like("%{}%".format(search)),
+                                        models.ParkingLot.address.like("%{}%".format(search)))
+                                    ).offset(offset=skip
+                                    ).limit(limit=limit
+                                    ).all()
+                
+                else:
+                    dbparkinglist = db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
+                                    ).outerjoin(car_remaing_space, car_remaing_space.c.parkinglotid == models.ParkingLot.id
+                                    ).outerjoin(motorbike_remaing_space, motorbike_remaing_space.c.parkinglotid == models.ParkingLot.id
+                                    ).filter(models.ParkingLot.lat.between(south, north), models.ParkingLot.lng.between(west, east)
+                                    ).offset(offset=skip
+                                    ).limit(limit=limit
+                                    ).all()
+                                
+            else:
+                if((not search.isspace()) & (search != "") & (search != None)):
+                    dbparkinglist = db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
+                                    ).outerjoin(car_remaing_space, car_remaing_space.c.parkinglotid == models.ParkingLot.id
+                                    ).outerjoin(motorbike_remaing_space, motorbike_remaing_space.c.parkinglotid == models.ParkingLot.id
+                                    ).filter(or_(
+                                        models.ParkingLot.name.like("%{}%".format(search)),
+                                        models.ParkingLot.address.like("%{}%".format(search)))
+                                    ).offset(offset=skip
+                                    ).limit(limit=limit
+                                    ).all()
+                else:
+                    dbparkinglist = db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
+                                    ).outerjoin(car_remaing_space, car_remaing_space.c.parkinglotid == models.ParkingLot.id
+                                    ).outerjoin(motorbike_remaing_space, motorbike_remaing_space.c.parkinglotid == models.ParkingLot.id
+                                    ).offset(offset=skip
+                                    ).limit(limit=limit
+                                    ).all()
             return dbparkinglist
     except Exception as e:
         raise e
@@ -75,10 +111,19 @@ def get_parkinglot_list(lat:float, lng:float, skip: int=0, limit: int=10):
 def get_last_parkingdata_by_licensenumber(licensenumber: str, parkingareaid:int):
 
     with connectdb.session() as db:
-        response = db.query(models.ParkingData).filter(models.ParkingData.license == licensenumber and 
+        response = db.query(models.ParkingData).filter(models.ParkingData.license == licensenumber, 
+                                                       models.ParkingData.parkingareaid == parkingareaid).order_by(models.ParkingData.id.desc()).first()
+        
+        return response
+    
+def get_last_parkingdata_by_userid(userid: int, parkingareaid:int):
+
+    with connectdb.session() as db:
+        response = db.query(models.ParkingData).filter(models.TransactionDetail.parkingdataid == models.ParkingData.id, models.TransactionDetail.userid == userid,
                                                        models.ParkingData.parkingareaid==parkingareaid).order_by(models.ParkingData.id.desc()).first()
         
         return response
+
 
 #UPDATE
 
