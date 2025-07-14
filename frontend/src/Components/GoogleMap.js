@@ -10,7 +10,7 @@ const CustomGoogleMap = () => {
     const [input, setInputs] = useState("")
     const [parkinglotMarker, setParkingLotMarker] = useState()
     const [parkinglotlist, setParkinglotlist] = useState([])
-    const [clickedParkinglot, setClickedParkinglot] = useState(0)
+    const [clickedParkinglot, setClickedParkinglot] = useState(null)
     const [displayParkingArea, setParkingArea] = useState([])
     const [geolocation, setGeolocation] = useState()
 
@@ -36,12 +36,18 @@ const CustomGoogleMap = () => {
         .then((response) => response.json())
         .then((data) => setParkinglotlist(data))
         .catch((err)=> console.log(err))
+        unClickedParkinglot()
+    }
+
+    const unClickedParkinglot = () => {
         setParkingArea([]);
+        setClickedParkinglot(null)
+        document.getElementById("parkinglotdetail").style.display = "none"
     }
 
     useEffect(() => {
-        if (clickedParkinglot>0){
-            fetch(`${getBackendContext()}/parkinglot/parkingarea/list?parkinglotid=${clickedParkinglot}`, {
+        if (clickedParkinglot !== null){
+            fetch(`${getBackendContext()}/parkinglot/parkingarea/list?parkinglotid=${clickedParkinglot.id}`, {
                 method: "GET",
             })
             .then((response) => response.json())
@@ -102,12 +108,13 @@ const CustomGoogleMap = () => {
     const onClickParkingLot = (event) => {
         const map = mapRef.current.map
         const clicked = parseInt(event.target.getAttribute("parkinglotid"))
-        setClickedParkinglot(clicked)
         const result = parkinglotlist.filter((parkinglot) => {return parkinglot.id===clicked})[0]
+        setClickedParkinglot(result)
         console.log(result)
         const pos = {lat: result.lat, lng: result.lng}
         map.setCenter(pos)
         setParkingLotMarker(pos)
+        document.getElementById("parkinglotdetail").style.display = "flex"
     }
     
     const parkinglots = parkinglotlist.map((val) => (
@@ -120,7 +127,7 @@ const CustomGoogleMap = () => {
     ))
 
     const parkingareas = displayParkingArea.map((val) => (
-        <div key={val.id} className="parkinglotitem">
+        <div key={val.id} className="parkinglotdetailareaitem">
             <p>Area name: {val.area}<br />
             Type: {val.iscar ? "car":"motorbike"}<br />
             Remaining Space: {val.remainingspace}<br />
@@ -146,7 +153,7 @@ const CustomGoogleMap = () => {
                 </Map>
             </div>
             <div className="parkinglotdiv">
-                <div>
+                <div className="parkinglotsearch">
                     <input type="text" name="currentposition" placeholder="current position" className="ParkinglotSearch" onChange={handleChange}/>
                     <button onClick={PositionSearch}>Enter</button>
                 </div>
@@ -159,7 +166,37 @@ const CustomGoogleMap = () => {
                         <div className="parkinglot">
                             {parkinglots}
                         </div>
-                        <div className="parkinglot">
+                        <div className='parkinglotdetail' id="parkinglotdetail">
+                            <button type='button' onClick={unClickedParkinglot}>Back</button>
+                            <img src={clickedParkinglot ? `${getBackendContext()}/${clickedParkinglot.image_path}` : undefined} alt="No img" className="parkinglotddetailimage" />
+                            <div className='parkinglotdetailinfo'>
+                                <span className='parkinglotdetailinfotitle'>Name: </span>
+                                <span className='parkinglotdetailinfovalue'>{clickedParkinglot?clickedParkinglot.name:""}</span>
+                            </div>
+                            <div className='parkinglotdetailinfo'>
+                                <span className='parkinglotdetailinfotitle'>Address: </span>
+                                <span className='parkinglotdetailinfovalue'>{clickedParkinglot?clickedParkinglot.address:""}</span>
+                            </div>
+                            <div className='parkinglotdetailinfo'>
+                                <span className='parkinglotdetailinfotitle'>Day Motorbike Fee: </span>
+                                <span className='parkinglotdetailinfovalue'>{clickedParkinglot?clickedParkinglot.dayfeemotorbike:""}/4h</span>
+                            </div>
+                            <div className='parkinglotdetailinfo'>
+                                <span className='parkinglotdetailinfotitle'>Night Motorbike Fee: </span>
+                                <span className='parkinglotdetailinfovalue'>{clickedParkinglot?clickedParkinglot.nightfeemotorbike:""}/4h</span>
+                            </div>
+                            <div className='parkinglotdetailinfo'>
+                                <span className='parkinglotdetailinfotitle'>Car Fee: </span>
+                                <span className='parkinglotdetailinfovalue'>{clickedParkinglot?clickedParkinglot.carfee:""}/4h</span>
+                            </div>
+                            <div className='parkinglotdetailinfo'>
+                                <span className='parkinglotdetailinfotitle'>Car Remaining Space: </span>
+                                <span className='parkinglotdetailinfovalue'>{clickedParkinglot?clickedParkinglot.car_remaining_space:""}</span>
+                            </div>
+                            <div className='parkinglotdetailinfo'>
+                                <span className='parkinglotdetailinfotitle'>Motorbike Remaining Space: </span>
+                                <span className='parkinglotdetailinfovalue'>{clickedParkinglot?clickedParkinglot.motorbike_remaining_space:""}</span>
+                            </div>
                             {parkingareas}
                         </div>
                     </div>

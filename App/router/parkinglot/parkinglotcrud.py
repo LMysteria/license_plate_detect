@@ -64,21 +64,21 @@ def get_parkinglot_list(search:str, lat:float, lng:float, skip: int=0, limit: in
                 west = lng-lngOffset
                 east = lng+lngOffset
                 
-                if((not search.isspace()) & (search != "") & (search != None)):
-                    dbparkinglist = db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
-                                    ).outerjoin(car_remaing_space, car_remaing_space.c.parkinglotid == models.ParkingLot.id
-                                    ).outerjoin(motorbike_remaing_space, motorbike_remaing_space.c.parkinglotid == models.ParkingLot.id
-                                    ).filter(or_(
-                                        and_(models.ParkingLot.lat.between(south, north), 
-                                            models.ParkingLot.lng.between(west, east)),
-                                        models.ParkingLot.name.like("%{}%".format(search)),
-                                        models.ParkingLot.address.like("%{}%".format(search)))
-                                    ).offset(offset=skip
-                                    ).limit(limit=limit
-                                    ).all()
+                if(search != None):
+                    if((not search.isspace()) & (search != "")):
+                        return db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
+                                        ).outerjoin(car_remaing_space, car_remaing_space.c.parkinglotid == models.ParkingLot.id
+                                        ).outerjoin(motorbike_remaing_space, motorbike_remaing_space.c.parkinglotid == models.ParkingLot.id
+                                        ).filter(or_(
+                                            and_(models.ParkingLot.lat.between(south, north), 
+                                                models.ParkingLot.lng.between(west, east)),
+                                            models.ParkingLot.name.like("%{}%".format(search)),
+                                            models.ParkingLot.address.like("%{}%".format(search)))
+                                        ).offset(offset=skip
+                                        ).limit(limit=limit
+                                        ).all()
                 
-                else:
-                    dbparkinglist = db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
+                return db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
                                     ).outerjoin(car_remaing_space, car_remaing_space.c.parkinglotid == models.ParkingLot.id
                                     ).outerjoin(motorbike_remaing_space, motorbike_remaing_space.c.parkinglotid == models.ParkingLot.id
                                     ).filter(models.ParkingLot.lat.between(south, north), models.ParkingLot.lng.between(west, east)
@@ -86,9 +86,9 @@ def get_parkinglot_list(search:str, lat:float, lng:float, skip: int=0, limit: in
                                     ).limit(limit=limit
                                     ).all()
                                 
-            else:
+            if(search != None):
                 if((not search.isspace()) & (search != "") & (search != None)):
-                    dbparkinglist = db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
+                    return db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
                                     ).outerjoin(car_remaing_space, car_remaing_space.c.parkinglotid == models.ParkingLot.id
                                     ).outerjoin(motorbike_remaing_space, motorbike_remaing_space.c.parkinglotid == models.ParkingLot.id
                                     ).filter(or_(
@@ -97,14 +97,12 @@ def get_parkinglot_list(search:str, lat:float, lng:float, skip: int=0, limit: in
                                     ).offset(offset=skip
                                     ).limit(limit=limit
                                     ).all()
-                else:
-                    dbparkinglist = db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
+            return db.query(models.ParkingLot, car_remaing_space.c.car_remaining_space, motorbike_remaing_space.c.motorbike_remaining_space
                                     ).outerjoin(car_remaing_space, car_remaing_space.c.parkinglotid == models.ParkingLot.id
                                     ).outerjoin(motorbike_remaing_space, motorbike_remaing_space.c.parkinglotid == models.ParkingLot.id
                                     ).offset(offset=skip
                                     ).limit(limit=limit
                                     ).all()
-            return dbparkinglist
     except Exception as e:
         raise e
     

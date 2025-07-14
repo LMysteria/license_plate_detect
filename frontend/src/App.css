@@ -70,14 +70,6 @@ form div label{
   float: right;
 }
 
-.parkinglotitem{
-  border: 1px solid black;
-  border-radius: 1em;
-  width: fit-content;
-  margin: 0 auto;
-  padding: 0 1em;
-}
-
 .userDetail{
     margin: 0 auto;
     width: fit-content;
@@ -90,6 +82,8 @@ form div label{
   padding: 0.5em;
   width: 17vw;
   background-color: white;
+  border: 1px solid black;
+  border-radius: 1em;
 }
 
 .parkinglotitem div{
@@ -106,17 +100,26 @@ form div label{
   flex-direction: column;
   gap: 1em;
   width: fit-content;
+  height: 80vh;
+  overflow-y: auto;
 }
 
 .parkinglotdisplay{
+  position: relative;
+  margin-top: 1em;
   display: flex;
   flex-direction: row;
   gap: 2em;
 }
 
+.parkinglot::-webkit-scrollbar, .parkinglotdetail::-webkit-scrollbar{
+  display: none;               /* Chrome, Safari, Opera */
+}
+
 .parkinglotimage{
-  width: 50%;
-  height: 100%;
+  width: 40%;
+  aspect-ratio: 4/3;
+  border-radius: 1em;
 }
 
 .parkinglotdiv{
@@ -333,4 +336,63 @@ h2, h3{
 
 .warning{
   color: red;
+}
+
+.parkinglotdetail{
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  position: absolute;
+  background-color: white;
+  width: 24vw;
+  height: 77vh;
+  border: 1px solid black;
+  border-radius: 1em;
+  padding: 0.5em ;
+  overflow-y: auto;
+}
+
+.circleborder{
+  border-radius: 1em;
+}
+
+.parkinglotdetailareaitem{
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+  width: fit-content;
+  height: 100%;
+  padding: 0.25em 0;
+  width: 23vw;
+  height: 20%;
+  border: 1px solid black;
+  border-radius: 1em;
+}
+
+.parkinglotdetailareaitem p{
+  width: 50%;
+  margin-left: 0.25em;
+}
+
+.parkinglotddetailimage{
+  width: 80%;
+  aspect-ratio: 4/3;
+  border-radius: 1em;
+  margin: 0 auto;
+}
+
+.parkinglotdetailinfo{
+  width: 80%;
+  display: flex;
+  gap: 1em;
+}
+
+.parkinglotdetailinfotitle{
+  width: 60%;
+  text-align: right;
+}
+
+.parkinglotdetailinfovalue{
+  width: 39%;
+  overflow-x: auto;
 }
