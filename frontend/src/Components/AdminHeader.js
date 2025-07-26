@@ -9,6 +9,10 @@ const AdminHeader = () => {
     const navigate = useNavigate()
 
     useEffect(() => {
+        document.title = "Parking Lot System";
+    }, []);
+
+    useEffect(() => {
         if (token === ""){
             navigate("/login")
         }

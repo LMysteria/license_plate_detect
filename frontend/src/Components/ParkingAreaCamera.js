@@ -9,6 +9,7 @@ const ParkingAreaCamera = (props) => {
     const [parkingData, setParkingData] = useState({})
     const [token] = useState(Cookies.get("Host-access_token") || "");
     const [manualExitImg, setManualExitImg] = useState()
+    const [log, setLog] = useState([])
 
 
     useEffect(() => {
@@ -17,9 +18,17 @@ const ParkingAreaCamera = (props) => {
         ws.binaryType = "arraybuffer"
 
         ws.onmessage = (event) => {
+            const wsdata = event.data
+            if(typeof wsdata === "string"){
+                console.log("wsmessage: ",wsdata)
+                const timestamp = new Date().toLocaleTimeString();
+                const newlog = `${timestamp} ${wsdata}`
+                setLog((prevlog) => [...prevlog, newlog]);
+            }
+            if(wsdata instanceof ArrayBuffer){
             const blob = new Blob([event.data], {type: "image/jpeg"});
             const imageUrl = URL.createObjectURL(blob);
-            setImageData(imageUrl);
+            setImageData(imageUrl);}
         };
 
         ws.onerror = (err) => {
@@ -108,11 +117,15 @@ const ParkingAreaCamera = (props) => {
         document.getElementById("editbackground").style.display="none"
     }
 
+    const displayLogs = log.map((log, index) => (
+        <div key={index}>{log}<br/></div>
+    ))
+
     return(
         <div>
             <div className="manageBody">
                 <div>
-                    <h2>Camera number: {props.camera_num} parkingareaid: {props.parkingareaid}</h2>
+                    <h2>Camera number: {props.camera_num} parkingareaid: {props.parkingareaid} Type:{props.ischeckin?"Check in":"Check out"}</h2>
                     <div className="manageDisplay">
                         <div className="displayContent">
                             <h3>Camera</h3>
@@ -145,7 +158,7 @@ const ParkingAreaCamera = (props) => {
                     </div>
                 </div>
                 <div className="parkingDataDisplay">
-                    <span className><strong>Parking Data:</strong></span>
+                    <span><strong>Parking Data:</strong></span>
                     <div className="dataDetail">
                         <span>UserID: {parkingData.userid}</span>
                         <span>License: {parkingData.license}</span>
@@ -155,6 +168,10 @@ const ParkingAreaCamera = (props) => {
                 </div>
                 <div>
                     <button type="button" onClick={manualexit}>Manual Exit</button>
+                </div>
+                <div style={{overflowY:"auto"}}>
+                    <h2 style={{textAlign:"left"}}>Log:</h2>
+                    {displayLogs}
                 </div>
             </div>
             <div className="editbackground" id="editbackground">

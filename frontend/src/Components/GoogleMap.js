@@ -30,7 +30,7 @@ const CustomGoogleMap = () => {
     }
 
     const getParkinglotList = ({lat, lng}) => {
-        fetch(`${getBackendContext()}/parkinglot/list?lat=${lat}&lng=${lng}`,{
+        fetch(`${getBackendContext()}/parkinglot/list?lat=${lat}&lng=${lng}&search=${input.searchParkinglot}`,{
             method: "GET",
         })
         .then((response) => response.json())
@@ -43,6 +43,7 @@ const CustomGoogleMap = () => {
         setParkingArea([]);
         setClickedParkinglot(null)
         document.getElementById("parkinglotdetail").style.display = "none"
+        document.getElementById("parkinglot").style.display = "flex"
     }
 
     useEffect(() => {
@@ -78,6 +79,11 @@ const CustomGoogleMap = () => {
             const pos = results[0].geometry.location;
             map.setCenter(pos)
             setCurrentMarkers(pos)
+            const parkinglotsearch = input.searchParkinglot
+            console.log(parkinglotsearch)
+            if((parkinglotsearch === undefined) | (parkinglotsearch === "")){
+                getParkinglotList(pos)
+            }
         })
         .catch(console.error);
     }  
@@ -115,22 +121,23 @@ const CustomGoogleMap = () => {
         map.setCenter(pos)
         setParkingLotMarker(pos)
         document.getElementById("parkinglotdetail").style.display = "flex"
+        document.getElementById("parkinglot").style.display = "none"
     }
     
     const parkinglots = parkinglotlist.map((val) => (
             <div key={val.id} parkinglotid={val.id} className="parkinglotitem" onClick={onClickParkingLot}>
-                <p parkinglotid={val.id}>Name: {val.name}<br />
-                Address: {val.address}<br />
-                Car Remaining Space: {val.car_remaining_space}<br />
-                Motorbike Remaining Space: {val.motorbike_remaining_space}</p>
+                <p parkinglotid={val.id}><strong parkinglotid={val.id}>Name:</strong> {val.name}<br />
+                <strong parkinglotid={val.id}>Address:</strong> {val.address}<br />
+                <strong parkinglotid={val.id}>Car Remaining Space:</strong> {val.car_remaining_space}<br />
+                <strong parkinglotid={val.id}>Motorbike Remaining Space:</strong> {val.motorbike_remaining_space}</p>
             </div>
     ))
 
     const parkingareas = displayParkingArea.map((val) => (
         <div key={val.id} className="parkinglotdetailareaitem">
-            <p>Area name: {val.area}<br />
-            Type: {val.iscar ? "car":"motorbike"}<br />
-            Remaining Space: {val.remainingspace}<br />
+            <p><strong>Area name:</strong> {val.area}<br />
+            <strong>Type:</strong> {val.iscar ? "car":"motorbike"}<br />
+            <strong>Remaining Space:</strong> {val.remainingspace}<br />
             </p>
             <img src={val.imagepath?`${getBackendContext()}/${val.imagepath}`:undefined} alt="No img" className="parkinglotimage"/>
         </div>
@@ -162,8 +169,8 @@ const CustomGoogleMap = () => {
                         <input type="text" name="searchParkinglot" placeholder="Destination for search" onChange={handleChange} className="ParkinglotSearch"/>
                         <button name="Search" onClick={Search}>Search</button>
                     </div>
-                    <div className="parkinglotdisplay">
-                        <div className="parkinglot">
+                    <div className="parkinglotdisplay" id="parkinglotdisplay">
+                        <div className="parkinglot" id="parkinglot">
                             {parkinglots}
                         </div>
                         <div className='parkinglotdetail' id="parkinglotdetail">

@@ -238,7 +238,7 @@ const ParkingLotAdmin = () => {
                 Car Remaining Space: {val.car_remaining_space}<br />
                 Motorbike Remaining Space: {val.motorbike_remaining_space}</p>
             <div parkinglotid={val.id}>
-                <img parkinglotid={val.id} src={val.image_path ? `${getBackendContext()}/${val.image_path}` : undefined} alt="No img" className="parkinglotimage" />
+                <img parkinglotid={val.id} src={val.image_path ? `${getBackendContext()}/${val.image_path}` : undefined} alt="No img" className="adminparkinglotimage" />
                 <button type="button" onClick={EditParkingLot}>Edit</button>
                 <button type="button" onClick={createParkingArea}>Create Parking Area</button>
             </div>
@@ -251,8 +251,8 @@ const ParkingLotAdmin = () => {
                 Type: {val.iscar ? "car" : "motorbike"}<br />
                 Remaining Space: {val.remainingspace}<br />
             </p>
-            <div>
-                <img src={val.imagepath ? `${getBackendContext()}/${val.imagepath}` : undefined} alt="No img" className="parkinglotimage" />
+            <div className="side">
+                <img src={val.imagepath ? `${getBackendContext()}/${val.imagepath}` : undefined} alt="No img" className="adminparkinglotimage" />
                 <button type="button" onClick={EditParkingArea}>Edit</button>
             </div>
         </div>

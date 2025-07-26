@@ -43,6 +43,9 @@ def parking_exit(img: UploadFile, parkingareaid:int, userid:int, detected:str):
         if(not entryparkingdb):
             raise HTTPException(status_code=400, detail="parkingdata with userid {} not found".format(userid))
         
+        if(entryparkingdb.exit_time):
+            raise HTTPException(status_code=400, detail="parkingdata with userid {} not found".format(userid))
+        
         parkingdb = entryparkingdb
         if (not entryparkingdb.manualcheckid):
             transactiondb = usercrud.get_transaction_by_userid_parkingid(userid=userid, parkingdataid=entryparkingdb.id)

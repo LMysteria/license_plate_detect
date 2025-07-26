@@ -16,7 +16,7 @@ import {setDefaults} from 'react-geocode'
 
 function App() {
   setDefaults({
-    key: process.env.REACT_APP_GOOGLE_GEOCODE_API_KEY, // Your API key here.
+    key: process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // Your API key here.
     language: "en", // Default language for responses.
     region: "es", // Default region for responses.
   });

@@ -26,9 +26,14 @@ const PageHeader = (outline) => {
         }
     },[token, navigate])
 
+    useEffect(() => {
+        document.title = "Parking Lot App";
+    }, []);
+
     const logout = () => {
         Cookies.remove("Host-access_token",{path:"/"});
         setToken("");
+        setDetail({})
     }
     console.log(detail)
     return(

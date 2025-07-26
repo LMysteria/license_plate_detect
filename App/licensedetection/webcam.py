@@ -84,11 +84,9 @@ async def webcam(parkingareaid:int, isCheckIn:bool, camera_num:int, websocket:We
                     else:
                         response = requests.post(f"{backendcontext}/parkinglot/parkingarea/parkingdata/exit",data=form, files=images)
                     if response.status_code == 200:
-                        websocket.send_text("Record successful")
-                        print(response.json())
+                        await websocket.send_text(f"Vehicle with plate {lp} and userid {userid} {'checkin' if isCheckIn else 'checkout'} successful in parkingareaid {parkingareaid}")
                     else:
-                        websocket.send_text("Record Failed")
-                        print(response.json())
+                        await websocket.send_text(f"Vehicle with plate {lp} and userid {userid} {'checkin' if isCheckIn else 'checkout'} failed in parkingareaid {parkingareaid}")
                     print("Receive response in: {}s".format(time.time()-start))
             new_frame_time = time.time()
             fps = 1/(new_frame_time-prev_frame_time)

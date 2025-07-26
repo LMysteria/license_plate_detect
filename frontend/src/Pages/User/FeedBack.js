@@ -53,11 +53,11 @@ const FeedBackPage = () => {
                 <h1>Submit Feedback</h1>
                 <div>
                     <label htmlFor="subject">Subject: </label>
-                    <input type="text" name="subject" value={input.subject || ""} onChange={handleChange} />
+                    <input style={{width:"20em"}} type="text" name="subject" value={input.subject || ""} onChange={handleChange} />
                 </div>
                 <div>
                     <label htmlFor="detail">Detail: </label>
-                    <input type="text" name="detail" value={input.detail || ""} onChange={handleChange} />
+                    <textarea style={{resize:"none", width:"20em"}} type="textarea" name="detail" value={input.detail || ""} onChange={handleChange} />
                 </div>
                 <div>
                     <button onClick={cancelForm}>Cancel</button>
