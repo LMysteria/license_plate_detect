@@ -1,5 +1,5 @@
 import PageHeader from "../../Components/PageHeader"
-import { data, Form, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { userContext } from "../../Components/PageHeader";
 import { getBackendContext, getAuthHeader } from "../../Util/AuthUtil";
@@ -23,7 +23,7 @@ const TransactionPage = () => {
                 setTransactionList(data)})
         }
 
-    },[transactionList])
+    },[transactionList, token])
 
     if(!usercontext){
         navigate("/")
