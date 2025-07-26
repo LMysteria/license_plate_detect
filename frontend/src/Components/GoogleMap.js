@@ -152,7 +152,7 @@ const CustomGoogleMap = () => {
                     defaultZoom={13}
                     defaultCenter={ center }
                     onCameraChanged={(ev) => console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)}
-                    onTilesLoaded={(map) => {mapRef.current = map; console.log("Ref loaded", mapRef.current); getGeolocation()}}
+                    onTilesLoaded={(map) => {mapRef.current = map; console.log("Ref loaded", mapRef.current);}}
                 >
                     <Marker position={currentMarker}/>
                     <Marker position={parkinglotMarker}/>
