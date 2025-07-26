@@ -52,7 +52,7 @@ Github repository: https://github.com/trungdinh22/License-Plate-Recognition
     DBUSERNAME=root
     DBPASSWORD=secret
     DBHOST=localhost
-    DATABASE=rpaui
+    DATABASE=license_plate
     ```
 
 6. **Set GoogleMap environment key:**
